@@ -1,0 +1,41 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+// Default styles section
+// .formDEN {
+// 	overflow: hidden;
+// 	padding: 1em;
+// 	color: "[theme:bodyText, default: #323130]";
+// 	color: var(--bodyText);
+// 	margin-top: -10px; // note: webpart closer to title
+
+// 	&.teams {
+// 		font-family: $ms-font-family-fallbacks;
+// 	}
+// }
+
+.rowX {
+	@include ms-Grid-row;
+	color: "[theme: black, default: #000000]";
+	padding: 0px 5px 10px 5px;
+}
+.row {
+	@include ms-Grid-row;
+	color: "[theme: black, default: #000000]";
+	padding: 0px 1em 0.6em 1em;
+}
+
+.colX {
+	color: "[theme: bodyText, default: #323130]";
+	color: var(--bodyText);
+	font-size: 1.5em;
+	font-weight: 700;
+	// @include ms-fontSize-24;
+}
+.col {
+	color: "[theme: bodyText, default: #323130]";
+	color: var(--bodyText);
+	font-size: 1.17em;
+	font-weight: 700;
+	// @include ms-fontSize-20;
+}
+

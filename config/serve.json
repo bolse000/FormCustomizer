@@ -1,0 +1,53 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/spfx-serve.schema.json",
+  "port": 4321,
+  "https": true,
+  "serveConfigurations": {
+    "default": {
+      "pageUrl": "https://{tenantDomain}/_layouts/15/SPListForm.aspx",
+      "formCustomizer": {
+        "componentId": "ddeff052-af31-4946-91e8-61e8b3c9822c",
+        "PageType": 8,
+        "RootFolder": "/sites/DEV_SB/Lists/CustomForm",
+        "properties": {
+          "sampleText": "Value"
+        }
+      }
+    },
+    "customForm_NewForm": {
+      "pageUrl": "https://{tenantDomain}/_layouts/15/SPListForm.aspx",
+      "formCustomizer": {
+        "componentId": "ddeff052-af31-4946-91e8-61e8b3c9822c",
+        "PageType": 8,
+        "RootFolder": "/sites/DEV_SB/Lists/CustomForm",
+        "properties": {
+          "sampleText": "Value"
+        }
+      }
+    },
+    "customForm_EditForm": {
+      "pageUrl": "https://{tenantDomain}/_layouts/15/SPListForm.aspx",
+      "formCustomizer": {
+        "componentId": "ddeff052-af31-4946-91e8-61e8b3c9822c",
+        "PageType": 6,
+        "RootFolder": "/sites/DEV_SB/Lists/CustomForm",
+        "ID": 1,
+        "properties": {
+          "sampleText": "Value"
+        }
+      }
+    },
+    "customForm_ViewForm": {
+      "pageUrl": "https://{tenantDomain}/_layouts/15/SPListForm.aspx",
+      "formCustomizer": {
+        "componentId": "ddeff052-af31-4946-91e8-61e8b3c9822c",
+        "PageType": 4,
+        "RootFolder": "/sites/DEV_SB/Lists/CustomForm",
+        "ID": 1,
+        "properties": {
+          "sampleText": "Value"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+// Shimmer
+.shimmerRoot {
+	display: 'flex';
+}
+
+.shimmerElements {
+	display: 'flex';
+	flex-wrap: 'wrap';
+	width: '100%'
+}
+
+
+// demo Grid
+.demoRow {
+	@include ms-Grid-row;
+	background-color: "[theme: themeLight, default: #c7e0f4]";
+	padding: 5px;
+}
+
+.demoBlock {
+	background-color: "[theme: themePrimary, default: #0078d7]";
+	color: "[theme: white, default: #ffffff]";
+	font-weight: 600;
+	margin-right: 0px;
+	border: 1px solid;
+	border-color: "[theme: themeLighterAlt, default: #eff6fc]";
+	text-align: center;
+}

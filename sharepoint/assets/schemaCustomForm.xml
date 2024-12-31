@@ -1,0 +1,66 @@
+<List xmlns:ows="Microsoft SharePoint"
+	BaseType="0"
+	Title="$Resources:shareddocuments_Title;"
+	Direction="$Resources:Direction;"
+	EnableContentTypes="TRUE"
+	FolderCreation="FALSE"
+	Url="Lists/CustomForm"
+	xmlns="http://schemas.microsoft.com/sharepoint/">
+	<MetaData>
+		<ContentTypes>
+			<ContentTypeRef ID="0x0100A68D433CD9144B499E7E9B660ACFAA3A" />
+		</ContentTypes>
+		<Fields></Fields>
+		<Views>
+			<View
+				BaseViewID="1"
+				Type="HTML"
+				WebPartZoneID="Main"
+				DisplayName="$Resources:core,objectiv_schema_mwsidcamlidC24;"
+				DefaultView="TRUE"
+				MobileView="TRUE"
+				MobileDefaultView="FALSE"
+				SetupPath="pages\viewpage.aspx"
+				ImageUrl="/_layouts/images/generic.png"
+				Url="AllItems.aspx"
+			>
+				<XslLink Default="TRUE">main.xsl</XslLink>
+				<JSLink>clienttemplates.js</JSLink>
+				<RowLimit Paged="TRUE">30</RowLimit>
+				<Toolbar Type="Standard" />
+				<ViewFields>
+					<FieldRef Name="LinkTitle" />
+					<FieldRef Name="clSingleText" />
+					<FieldRef Name="clMultiLinesEnhance" />
+					<FieldRef Name="clMultiLinesPlain" />
+					<FieldRef Name="clChoiceDrop" />
+					<FieldRef Name="clChoiceRadio" />
+					<FieldRef Name="clChoiceCheck" />
+					<FieldRef Name="clNumber" />
+					<FieldRef Name="clCurrency" />
+					<FieldRef Name="clDate" />
+					<FieldRef Name="clDateTime" />
+					<FieldRef Name="clYesNo" />
+					<FieldRef Name="clPerson" />
+					<FieldRef Name="clPersonGroup" />
+					<FieldRef Name="clPersonMulti" />
+					<FieldRef Name="clLink" />
+					<FieldRef Name="clPicture" />
+					<FieldRef Name="clImage" />
+					<FieldRef Name="clTaskOutcome" />
+					<FieldRef Name="clCalculated" />
+				</ViewFields>
+				<Query>
+					<OrderBy>
+						<FieldRef Name="ID" Ascending="FALSE" />
+					</OrderBy>
+				</Query>
+			</View>
+		</Views>
+		<Forms>
+			<Form Type="DisplayForm" Url="DispForm.aspx" SetupPath="pages\form.aspx" WebPartZoneID="Main" />
+			<Form Type="EditForm" Url="EditForm.aspx" SetupPath="pages\form.aspx" WebPartZoneID="Main" />
+			<Form Type="NewForm" Url="NewForm.aspx" SetupPath="pages\form.aspx" WebPartZoneID="Main" />
+		</Forms>
+	</MetaData>
+</List>

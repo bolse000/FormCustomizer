@@ -1,0 +1,43 @@
+{
+	"extends": "./node_modules/@microsoft/rush-stack-compiler-4.7/includes/tsconfig-web.json",
+	"compilerOptions": {
+		"target": "es2022",
+		"forceConsistentCasingInFileNames": true,
+		"module": "esnext",
+		"moduleResolution": "node",
+		"jsx": "react",
+		"declaration": true,
+		"sourceMap": true,
+		"experimentalDecorators": true,
+		"skipLibCheck": true,
+		"outDir": "lib",
+		"inlineSources": false,
+		"noImplicitAny": true,
+
+		// for dev.
+		"noUnusedLocals": false,
+
+		"typeRoots": [
+			"./node_modules/@types",
+			"./node_modules/@microsoft"
+		],
+		"types": [
+			"webpack-env"
+		],
+		"lib": [
+			"es2022",
+			"es2022.array",
+			"es2022.error",
+			"es2022.intl",
+			"es2022.object",
+			"es2022.string",
+			"dom",
+			"dom.iterable",
+			"webworker.importscripts"
+		]
+	},
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.tsx"
+	]
+}

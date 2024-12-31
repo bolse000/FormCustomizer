@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/">
+
+	<Field ID="{e39bd5dd-ee3f-4446-a8bf-4fe83c065397}"
+		Type="Text"
+		DisplayName="clSingleText"
+		Name="clSingleText"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		Group="CustomList"
+	/>
+
+	<Field ID="{47395528-e7af-4007-a07a-7bc639034556}"
+		Type="Note"
+		DisplayName="clMultiLinesEnhance"
+		Name="clMultiLinesEnhance"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		NumLines="6"
+		RichText="TRUE"
+		RichTextMode="FullHtml"
+		Group="CustomList"
+	/>
+
+	<Field ID="{3ccc2242-026d-4452-b567-3887e8286145}"
+		Type="Note"
+		DisplayName="clMultiLinesPlain"
+		Name="clMultiLinesPlain"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		NumLines="6"
+		RichText="FALSE"
+		Group="CustomList"
+	/>
+
+	<Field ID="{5a1044f7-3c4a-4b8c-96d9-9ba18dc05046}"
+		Type="Choice"
+		DisplayName="clChoiceDrop"
+		Name="clChoiceDrop"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		Format="Dropdown"
+		FillInChoice="FALSE"
+		Group="CustomList">
+		<Default>Enter Choice #1</Default>
+		<CHOICES>
+			<CHOICE>Enter Choice #1</CHOICE>
+			<CHOICE>Enter Choice #2</CHOICE>
+			<CHOICE>Enter Choice #3</CHOICE>
+		</CHOICES>
+	</Field>
+
+	<Field ID="{788ac377-76d7-47b1-978b-e627a133a247}"
+		Type="Choice"
+		DisplayName="clChoiceRadio"
+		Name="clChoiceRadio"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		Format="RadioButtons"
+		FillInChoice="FALSE"
+		Group="CustomList">
+		<Default>Enter Choice #1</Default>
+		<CHOICES>
+			<CHOICE>Enter Choice #1</CHOICE>
+			<CHOICE>Enter Choice #2</CHOICE>
+			<CHOICE>Enter Choice #3</CHOICE>
+		</CHOICES>
+	</Field>
+
+	<Field ID="{f240d61b-fbe4-4566-bded-3e05a01940db}"
+		Type="MultiChoice"
+		DisplayName="clChoiceCheck"
+		Name="clChoiceCheck"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		FillInChoice="FALSE"
+		Group="CustomList">
+		<Default>Enter Choice #1</Default>
+		<CHOICES>
+			<CHOICE>Enter Choice #1</CHOICE>
+			<CHOICE>Enter Choice #2</CHOICE>
+			<CHOICE>Enter Choice #3</CHOICE>
+		</CHOICES>
+	</Field>
+
+	<Field ID="{4b9d8a80-9420-4cb8-aaee-bd7b3c3ca93e}"
+		Type="Number"
+		DisplayName="clNumber"
+		Name="clNumber"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		Min="1"
+		Max="999"
+		Group="CustomList"
+	/>
+
+	<Field ID="{4d68c086-b8d3-499e-a976-ee67eb55f7a0}"
+		Type="Currency"
+		DisplayName="clCurrency"
+		Name="clCurrency"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		LCID="3084"
+		Group="CustomList"
+	/>
+
+	<Field ID="{fb8db38f-ee72-42d6-823f-a31194bdef76}"
+		Type="DateTime"
+		DisplayName="clDate"
+		Name="clDate"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		Format="DateOnly"
+		FriendlyDisplayFormat="Disabled"
+		Group="CustomList"
+	/>
+
+	<Field ID="{5f5d89c0-ce62-4721-b4bf-a62406aa32cc}"
+		Type="DateTime"
+		DisplayName="clDateTime"
+		Name="clDateTime"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		Format="DateTime"
+		FriendlyDisplayFormat="Relative"
+		Group="CustomList"
+	/>
+
+	<Field ID="{ebbe8f97-0c74-4956-988a-b14ead88303b}"
+		Type="Boolean"
+		DisplayName="clYesNo"
+		Name="clYesNo"
+		EnforceUniqueValues="FALSE"
+		Group="CustomList">
+		<Default>1</Default>
+	</Field>
+
+	<Field ID="{53df3725-5b23-490f-a423-7a094e7d1fe2}"
+		Type="User"
+		DisplayName="clPerson"
+		Name="clPerson"
+		List="UserInfo"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		ShowField="ImnName"
+		UserSelectionMode="PeopleOnly"
+		UserSelectionScope="0"
+		Group="CustomList"
+	/>
+
+	<Field ID="{2f861a1e-4ba2-44ab-8580-cf506e4c2dc0}"
+		Type="User"
+		DisplayName="clPersonGroup"
+		Name="clPersonGroup"
+		List="UserInfo"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		ShowField="ImnName"
+		UserSelectionMode="PeopleAndGroups"
+		UserSelectionScope="0"
+		Group="CustomList"
+	/>
+
+	<Field ID="{02168c80-c439-4e5a-bc1b-46107508a2c6}"
+		Type="UserMulti"
+		DisplayName="clPersonMulti"
+		Name="clPersonMulti"
+		List="UserInfo"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		ShowField="ImnName"
+		UserSelectionMode="PeopleOnly"
+		UserSelectionScope="0"
+		Mult="TRUE"
+		Group="CustomList"
+	/>
+
+	<Field ID="{78ccc1fa-f1db-4a90-a33d-8dc8b1d0bead}"
+		Type="URL"
+		DisplayName="clLink"
+		Required="FALSE"
+		Name="clLink"
+		EnforceUniqueValues="FALSE"
+		Format="Hyperlink"
+		Group="CustomList"
+	/>
+
+	<Field ID="{7b76104b-0251-4f04-aeee-550acdb9be5f}"
+		Type="URL"
+		DisplayName="clPicture"
+		Name="clPicture"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		Format="Image"
+		Group="CustomList"
+	/>
+
+	<Field ID="{6183b001-b775-419f-ab3b-543d1e54e104}"
+		Type="Thumbnail"
+		DisplayName="clImage"
+		Name="clImage"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		Group="CustomList"
+	/>
+
+	<Field ID="{a5c439b4-fd53-420f-a489-f6cb3098b788}"
+		Type="OutcomeChoice"
+		DisplayName="clTaskOutcome"
+		Name="clTaskOutcome"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		Group="CustomList">
+		<Default>Enter Choice #1</Default>
+		<CHOICES>
+			<CHOICE>Enter Choice #1</CHOICE>
+			<CHOICE>Enter Choice #2</CHOICE>
+			<CHOICE>Enter Choice #3</CHOICE>
+		</CHOICES>
+	</Field>
+
+	<Field ID="{9666b6dc-1d28-4049-b6e3-397ff9ac9f65}"
+		Type="Calculated"
+		DisplayName="clCalculated"
+		Name="clCalculated"
+		Required="FALSE"
+		EnforceUniqueValues="FALSE"
+		Format="DateOnly"
+		LCID="3084"
+		ResultType="Text"
+		ReadOnly="TRUE"
+		Group="CustomList">
+		<Formula>=Title&amp;&quot; - &quot;&amp;clDateTime</Formula>
+		<FieldRefs>
+			<FieldRef Name="clDateTime" />
+			<FieldRef Name="Title" />
+		</FieldRefs>
+	</Field>
+
+
+	<!-- ContentType CustomForm SAQ -->
+	<ContentType ID="0x0100A68D433CD9144B499E7E9B660ACFAA3A"
+		Name="CustomForm"
+		Group="SAQ Custom Form Content Types"
+		Description="Custom Form content types from web part solution">
+		<FieldRefs>
+			<FieldRef ID="{fa564e0f-0c70-4ab9-b863-0177e6ddd247}" Name="Title" />
+			<FieldRef ID="{82642ec8-ef9b-478f-acf9-31f7d45fbc31}" Name="LinkTitle" DisplayName="Title" ReadOnly="TRUE" />
+
+			<FieldRef ID="{e39bd5dd-ee3f-4446-a8bf-4fe83c065397}" />
+			<FieldRef ID="{47395528-e7af-4007-a07a-7bc639034556}" />
+			<FieldRef ID="{3ccc2242-026d-4452-b567-3887e8286145}" />
+			<FieldRef ID="{5a1044f7-3c4a-4b8c-96d9-9ba18dc05046}" />
+			<FieldRef ID="{788ac377-76d7-47b1-978b-e627a133a247}" />
+			<FieldRef ID="{f240d61b-fbe4-4566-bded-3e05a01940db}" />
+			<FieldRef ID="{4b9d8a80-9420-4cb8-aaee-bd7b3c3ca93e}" />
+			<FieldRef ID="{4d68c086-b8d3-499e-a976-ee67eb55f7a0}" />
+			<FieldRef ID="{fb8db38f-ee72-42d6-823f-a31194bdef76}" />
+			<FieldRef ID="{5f5d89c0-ce62-4721-b4bf-a62406aa32cc}" />
+			<FieldRef ID="{ebbe8f97-0c74-4956-988a-b14ead88303b}" />
+			<FieldRef ID="{53df3725-5b23-490f-a423-7a094e7d1fe2}" />
+			<FieldRef ID="{2f861a1e-4ba2-44ab-8580-cf506e4c2dc0}" />
+			<FieldRef ID="{02168c80-c439-4e5a-bc1b-46107508a2c6}" />
+			<FieldRef ID="{78ccc1fa-f1db-4a90-a33d-8dc8b1d0bead}" />
+			<FieldRef ID="{7b76104b-0251-4f04-aeee-550acdb9be5f}" />
+			<FieldRef ID="{6183b001-b775-419f-ab3b-543d1e54e104}" />
+			<FieldRef ID="{a5c439b4-fd53-420f-a489-f6cb3098b788}" />
+			<FieldRef ID="{9666b6dc-1d28-4049-b6e3-397ff9ac9f65}" ReadOnly="TRUE" />
+		</FieldRefs>
+	</ContentType>
+
+
+	<!-- ListInstance CustomForm -->
+	<ListInstance
+		CustomSchema="schemaCustomForm.xml"
+		FeatureId="00bfea71-de22-43b2-a848-c05709900100"
+		Title="CustomForm"
+		Description="Liste avec toutes les colonnes de type de données"
+		TemplateType="100"
+		Url="Lists/CustomForm"
+	/>
+
+</Elements>

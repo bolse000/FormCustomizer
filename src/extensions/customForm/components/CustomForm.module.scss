@@ -1,0 +1,29 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.customForm {
+	overflow: hidden;
+	color: "[theme:bodyText, default: #323130]";
+	color: var(--bodyText);
+
+	&.teams {
+		font-family: $ms-font-family-fallbacks;
+	}
+}
+
+.formContainer {
+	// margin: 1rem;
+	padding: 1em;
+}
+
+.commandBarItems {
+	height: 32px;
+	margin: 5px 10px 5px 5px;
+
+	.btnSave {
+		margin-top: 5px;
+	}
+}
+
+.commandBarSeparators {
+	margin-top: -15px;
+}
