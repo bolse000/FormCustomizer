@@ -32,3 +32,10 @@ obj
 
 # Styles Generated Code
 *.scss.ts
+
+#Package-Lock
+package-lock.json
+
+# Other Files exclude
+[Tt]mp*
+.env
