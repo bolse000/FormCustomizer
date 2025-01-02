@@ -1,13 +1,13 @@
 import * as React from 'react';
 
 import styles from './FormDEN.module.scss';
-import { INewProps } from './IFormProps';
+import { IFormProps } from './IFormProps';
 import { IFormState } from './IFormState';
 
 
-export default class FormNew extends React.Component<INewProps, IFormState> {
+export default class FormNew extends React.Component<IFormProps, IFormState> {
 
-	constructor(props: INewProps) {
+	constructor(props: IFormProps) {
 		super(props);
 		console.log('FormNew:', props);
 
@@ -26,7 +26,7 @@ export default class FormNew extends React.Component<INewProps, IFormState> {
 	}
 
 
-	public render(): React.ReactElement<INewProps> {
+	public render(): React.ReactElement<IFormProps> {
 		const { displayMode, listGuid } = this.props;
 		return (<>
 			<div className={styles.row}>

@@ -1,6 +1,7 @@
 import { IDropdownOption } from "@fluentui/react/lib/Dropdown";
 // import { IFormState } from "../ICustomFormState";
 import { IFilePickerResult } from "@pnp/spfx-controls-react/lib/FilePicker";
+import { DescriptionUrl } from "../../libApp/IAppHelpers";
 
 export interface IProblemImage {
 	problemFilePick?: IFilePickerResult[];
@@ -32,14 +33,9 @@ export interface IFormState {
 	clPersonMulti: string[];
 	clPersonMultiId?: number[];
 
-	clLink: {
-		Description: string;
-		Url: string;
-	};
-	clPicture: {
-		Description: string;
-		Url: string;
-	};
+	clLink: DescriptionUrl;
+	clPicture: DescriptionUrl;
+
 	clImage: IProblemImage;
 	clTaskOutcome: IDropdownOption;
 }

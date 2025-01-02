@@ -6,14 +6,14 @@ import { PrimaryButton } from '@fluentui/react/lib/Button';
 import { CommandBar, ICommandBarItemProps } from '@fluentui/react/lib/CommandBar';
 import { Separator } from '@fluentui/react/lib/Separator';
 
-import FormDisplay from './forms/FormDisplay';
-import FormEdit from './forms/FormEdit';
+// import FormDisplay from './forms/FormDisplay';
+import FormDisplayEdit from './forms/FormDisplayEdit';
 import FormNew from './forms/FormNew';
 
 import styles from './CustomForm.module.scss';
 import { ICustomFormProps } from './ICustomFormProps';
 import { DemoRow } from '../../../common/components/CommonComponents';
-import { CustomListItem } from '../libApp/IAppHelpers';
+import { CustomListItem, FormDropOptions } from '../libApp/IAppHelpers';
 import { SPFI } from '@pnp/sp/fi';
 import { getSP } from '../../../common/utils/PnpSetup';
 import { ICustomFormState,  } from './ICustomFormState';
@@ -27,6 +27,7 @@ require('@fluentui/react/dist/css/fabric.css');
 
 export default class CustomForm extends React.Component<ICustomFormProps, ICustomFormState> {
 	private spFI: SPFI;
+	// private ddOptions: string[][] = [];
   // private pnpListItem: IItems;
 	// // Added for the item to show in the form; use with edit and view form
 	// private listItem: { Title?: string; };
@@ -63,14 +64,16 @@ export default class CustomForm extends React.Component<ICustomFormProps, ICusto
 		// console.log('optionsDrop:', optionsDrop);
 
 		// const [optionsCheck, optionsRadio, optionsDrop] =
-		await Promise.all([
-			this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceCheck'),
-			this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceRadio'),
-			this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceDrop')
-		]);
+		// await Promise.all([
+		// 	this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceCheck'),
+		// 	this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceRadio'),
+		// 	this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceDrop')
+		// ]);
 		// console.log('optionsCheck:', optionsCheck);
 		// console.log('optionsRadio:', optionsRadio);
 		// console.log('optionsDrop:', optionsDrop);
+		// this.ddOptions = [optionsCheck, optionsRadio, optionsDrop];
+		// console.log('ddOptions:', this.ddOptions);
 
 		if (this.props.displayMode === FormDisplayMode.New) {
 			// we're creating a new item so nothing to load
@@ -223,8 +226,8 @@ export default class CustomForm extends React.Component<ICustomFormProps, ICusto
 			clSingleText, clMultiLinesPlain, clMultiLinesEnhance,
 			clChoiceDrop, clChoiceRadio, clChoiceCheck,
 			clNumber, clCurrency, clDate, clDateTime, clYesNo,
+			clPersonId, clPersonGroupId, clPersonMultiId,
 			// clPerson, clPersonGroup, clPersonMulti,
-			clPersonId, clPersonGroupId, clPersonMultiId
 			// clLink, clPicture, clTaskOutcome
 		} = this.state.childState;
 		console.log('saveItem:', this.state);
@@ -244,6 +247,7 @@ export default class CustomForm extends React.Component<ICustomFormProps, ICusto
 			clDate: clDate,
 			clDateTime: clDateTime,
 			clYesNo: clYesNo,
+
 			clPersonId: clPersonId,
 			clPersonGroupId: clPersonGroupId,
 			clPersonMultiId: clPersonMultiId,
@@ -260,28 +264,56 @@ export default class CustomForm extends React.Component<ICustomFormProps, ICusto
 		this.setState({ childState: newState });
 	};
 
+	private getDropdownOptions = async (): Promise<FormDropOptions> => {
+		const [optionsCheck, optionsRadio, optionsDrop] =
+		await Promise.all([
+			this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceCheck'),
+			this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceRadio'),
+			this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceDrop')
+		]);
+		// const tmp: FormDropOptions =
+		return ({
+			'clChoiceCheck': optionsCheck.map((item) => ({ key: item, text: item })),
+			'clChoiceRadio': optionsRadio.map((item) => ({ key: item, text: item })),
+			'clChoiceDrop': optionsDrop.map((item) => ({ key: item, text: item }))
+		});
+		// return Promise.resolve(tmp);
+		// return [optionsCheck, optionsRadio, optionsDrop];
+		// this.ddOptions = [optionsCheck, optionsRadio, optionsDrop];
+		// console.log('ddOptions:', this.ddOptions);
+	};
+
 
 	public render(): React.ReactElement<ICustomFormProps> {
-		const { displayMode, listGuid, itemId } = this.props;
+		// const { displayMode } = this.props;
 		return (
 			<section className={styles.customForm}>
 				<form onSubmit={this.validateForm}>
 					<CommandBar items={this.getCommandBarItems()} />
 					<Separator className={styles.commandBarSeparators} />
 					<div className={styles.formContainer}>
-						{displayMode === FormDisplayMode.New && (
+						{this.props.displayMode === FormDisplayMode.New ? (
 							<FormNew
-								getItem={(listGuid: string, itemId: number) => this.loadItemById(listGuid, itemId)}
+								onDropOption={() => this.getDropdownOptions()}
+								onGetItem={(listGuid: string, itemId: number) => this.loadItemById(listGuid, itemId)}
+								onStateChange={this.handleChildState}
+								{...this.props}
+							/>
+						) : (
+							<FormDisplayEdit
+								onDropOption={() => this.getDropdownOptions()}
+								onGetItem={(listGuid: string, itemId: number) => this.loadItemById(listGuid, itemId)}
 								onStateChange={this.handleChildState}
 								{...this.props}
 							/>
 						)}
-						{displayMode === FormDisplayMode.Edit && (
+						{/* {displayMode === FormDisplayMode.Edit && (
 							<FormEdit
 								context={this.props.context}
 								displayMode={displayMode}
 								listGuid={listGuid}
 								itemId={itemId}
+								onDropOption={() => this.getDropdownOptions()}
 								getItem={(listGuid: string, itemId: number) => this.loadItemById(listGuid, itemId)}
 								onStateChange={this.handleChildState}
 								onSave={this.saveItem}
@@ -290,10 +322,11 @@ export default class CustomForm extends React.Component<ICustomFormProps, ICusto
 						)}
 						{displayMode === FormDisplayMode.Display && (
 							<FormDisplay
+								onDropOption={() => this.getDropdownOptions()}
 								getItem={(listGuid: string, itemId: number) => this.loadItemById(listGuid, itemId)}
 								{...this.props}
 							/>
-						)}
+						)} */}
 						<DemoRow />
 					</div>
 				</form>

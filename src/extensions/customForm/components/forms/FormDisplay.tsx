@@ -1,14 +1,14 @@
 import * as React from 'react';
 
 import styles from './FormDEN.module.scss';
-import { IDisplayProps } from './IFormProps';
+import { IFormProps } from './IFormProps';
 import { IFormState } from './IFormState';
 // import { DynamicForm } from '@pnp/spfx-controls-react/lib/DynamicForm';
 
 
-export default class FormDisplay extends React.Component<IDisplayProps, IFormState> {
+export default class FormDisplay extends React.Component<IFormProps, IFormState> {
 
-	constructor(props: IDisplayProps) {
+	constructor(props: IFormProps) {
 		super(props);
 		console.log('FormDisplay:', props);
 
@@ -26,7 +26,7 @@ export default class FormDisplay extends React.Component<IDisplayProps, IFormSta
 		// };
 	}
 
-	public render(): React.ReactElement<IDisplayProps> {
+	public render(): React.ReactElement<IFormProps> {
 		const { displayMode, itemId, listGuid } = this.props;
 		return (<>
 			<div className={styles.row}>

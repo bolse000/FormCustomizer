@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import styles from './FormDEN.module.scss';
-import { IEditProps } from './IFormProps';
+import { IFormProps } from './IFormProps';
 import { IFormState } from './IFormState';
 import { TextField } from '@fluentui/react/lib/TextField';
 import { RichText } from "@pnp/spfx-controls-react/lib/RichText";
@@ -20,23 +20,30 @@ import { IPersonaProps } from '@fluentui/react/lib/Persona';
 // import { FieldUrlRenderer } from '@pnp/spfx-controls-react/lib/FieldUrlRenderer';
 // import { FilePicker, IFilePickerResult } from '@pnp/spfx-controls-react/lib/FilePicker';
 import { UsersInfoGraphSPO } from '../../../../common/services/UsersInfoGraphSPO';
+import { FormDropOptions } from '../../libApp/IAppHelpers';
+import { FormDisplayMode } from '@microsoft/sp-core-library';
 
 
-export default class FormEdit extends React.Component<IEditProps, IFormState> {
+export default class FormDisplayEdit extends React.Component<IFormProps, IFormState> {
 	// private spFI: SPFI;
-	private ddOptions: IDropdownOption[] = [
-		{ key: 'Enter Choice #1', text: 'Enter Choice #1' },
-		{ key: 'Enter Choice #2', text: 'Enter Choice #2' },
-		{ key: 'Enter Choice #3', text: 'Enter Choice #3' }
-	];
+	// private ddOptions: IDropdownOption[] = [
+	// 	{ key: 'Enter Choice #1', text: 'Enter Choice #1' },
+	// 	{ key: 'Enter Choice #2', text: 'Enter Choice #2' },
+	// 	{ key: 'Enter Choice #3', text: 'Enter Choice #3' }
+	// ];
+	private ddOptions: FormDropOptions = {
+		clChoiceDrop: [{ key: '', text: '' }],
+		clChoiceRadio: [{ key: '', text: '' }],
+		clChoiceCheck: [{ key: '', text: '' }]
+	};
 	private readonly peoplePickerContext = SaqUtils.setPeoplePickerContext(this.props.context);
 
-	constructor(props: IEditProps) {
+	constructor(props: IFormProps) {
 		super(props);
 		// console.log('FormEdit:', props);
 
 		this.state = {
-			isFormDisabled: false,
+			isFormDisabled: this.props.displayMode === FormDisplayMode.Edit ? false : true,
 
 			Title: '',
 			clSingleText: '',
@@ -70,6 +77,31 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
 	public async componentDidMount(): Promise<void> {
 		console.time('FormEdit');
 
+		const item = await this.props.onDropOption();
+		this.ddOptions = {
+			clChoiceCheck: item.clChoiceCheck,
+			clChoiceRadio: item.clChoiceRadio,
+			clChoiceDrop: item.clChoiceDrop
+		};
+		// this.ddOptions = {
+		// 	clChoiceCheck: item.clChoiceCheck.map((item) => ({ key: item, text: item })),
+		// 	clChoiceRadio: item.clChoiceRadio.map((item) => ({ key: item, text: item })),
+		// 	clChoiceDrop: item.clChoiceDrop.map((item) => ({ key: item, text: item }))
+		// };
+		// this.ddOptions = await this.props.onDropOption().then((item) => {
+		// 	const tmp = {
+		// 		'clChoiceCheck': item.clChoiceCheck.map((item) => ({ key: item, text: item })),
+		// 		'clChoiceRadio': item.clChoiceRadio.map((item) => ({ key: item, text: item })),
+		// 		'clChoiceDrop': item.clChoiceDrop.map((item) => ({ key: item, text: item }))
+		// 	};
+		// 	return tmp;
+		// 	// return item.clChoiceCheck.map((item) => ({ key: item, text: item }));
+		// }).catch((error) => {console.error('error:', error)});
+
+		// console.log('props.ddOptions:', this.props.ddOptions);
+		// this.ddOptions = await this.props.onDropOption();
+		console.log('ddOptions:', this.ddOptions);
+
 		await this.setFormItem();
 		// if (this.props.displayMode === FormDisplayMode.New) {
 		// 	// we're creating a new item so nothing to load
@@ -81,7 +113,7 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
 
 	// Executed after component is rendered
 	public async componentDidUpdate(
-		_prevProps: Readonly<IEditProps>, _prevState: Readonly<IFormState>
+		_prevProps: Readonly<IFormProps>, _prevState: Readonly<IFormState>
 	): Promise<void> {
     if (_prevState !== this.state) {
       this.props.onStateChange(this.state);
@@ -89,19 +121,25 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
   }
 
 	private setFormItem = async (): Promise<void> => {
-		const { listGuid, itemId } = this.props;
-		const item = await this.props.getItem(listGuid.toString(), itemId);
-		// console.log('loadItem:', item);
-
 		const getMail = async (someId: number): Promise<string[]> => {
 			const user = UsersInfoGraphSPO.getUserById(someId);
 			const mail = user.then((item) => [item.Email]);
 			return mail;
 			// return UsersInfoGraphSPO.getUserById(someId);
 		};
-		const mailPerson = await getMail(item.clPersonId);
-		const mailPersonGroup = await getMail(item.clPersonGroupId);
-		const mailPersonMulti = await Promise.all(item.clPersonMultiId.map((item) => getMail(item)));
+
+		const { listGuid, itemId } = this.props;
+		const item = await this.props.onGetItem(listGuid.toString(), itemId);
+		// console.log('loadItem:', item);
+
+		const [mailPerson, mailPersonGroup, mailPersonMulti] = await Promise.all([
+			getMail(item.clPersonId),
+			getMail(item.clPersonGroupId),
+			Promise.all(item.clPersonMultiId.map((item) => getMail(item)))
+		]);
+		// const mailPerson = await getMail(item.clPersonId);
+		// const mailPersonGroup = await getMail(item.clPersonGroupId);
+		// const mailPersonMulti = await Promise.all(item.clPersonMultiId.map((item) => getMail(item)));
 
 		this.setState({
 			Title: item.Title,
@@ -116,12 +154,14 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
 			clDate: new Date(item.clDate),
 			clDateTime: new Date(item.clDateTime),
 			clYesNo: item.clYesNo,
+
 			clPerson: mailPerson,
 			clPersonId: item.clPersonId,
 			clPersonGroup: mailPersonGroup,
 			clPersonGroupId: item.clPersonGroupId,
 			clPersonMulti: mailPersonMulti.flat(),
 			clPersonMultiId: item.clPersonMultiId,
+
 			clLink: item.clLink,
 			clPicture: item.clPicture,
 		}
@@ -241,7 +281,7 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
 
 			this.setState((prevState) => ({
 				...prevState,
-				[target]: someEmp.map((item: IPersonaProps) => item.secondaryText || ''),
+				// [target]: someEmp.map((item: IPersonaProps) => item.secondaryText || ''),
 				[`${target}Id`]: empId.length === 1 ? empId[0] : empId
 			}));
 		}
@@ -298,7 +338,7 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
 	// }
 
 
-	public render(): React.ReactElement<IEditProps> {
+	public render(): React.ReactElement<IFormProps> {
 		const { displayMode, itemId, listGuid } = this.props;
 		const {
 			isFormDisabled, Title,
@@ -384,7 +424,8 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
 							disabled={isFormDisabled}
 							selectedKey={clChoiceDrop.key}
 							onChange={this.chgDropdown}
-							options={this.ddOptions}
+							options={this.ddOptions.clChoiceDrop}
+							// options={this.ddOptions ? this.ddOptions.clChoiceDrop : []}
 						/>
 					</div>
 					<div className='ms-Grid-col ms-lg4'>
@@ -396,7 +437,8 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
 							disabled={isFormDisabled}
 							selectedKey={clChoiceRadio.key}
 							onChange={this.chgDropdown}
-							options={this.ddOptions}
+							options={this.ddOptions.clChoiceRadio}
+							// options={this.ddOptions ? this.ddOptions.clChoiceRadio : []}
 						/>
 					</div>
 					<div className='ms-Grid-col ms-lg4'>
@@ -409,7 +451,8 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
 							disabled={isFormDisabled}
 							selectedKeys={clChoiceCheck.map((item) => item.key as string)}
 							onChange={this.chgDropdownMulti}
-							options={this.ddOptions}
+							options={this.ddOptions.clChoiceCheck}
+							// options={this.ddOptions ? this.ddOptions.clChoiceCheck : []}
 						/>
 					</div>
 				</div>

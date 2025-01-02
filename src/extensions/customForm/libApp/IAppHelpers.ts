@@ -1,4 +1,23 @@
-// Interface for the JSON structure
+// Application Interfaces
+//---------------------------
+export interface IDropDown {
+	key: string;
+	text: string;
+}
+
+//---------------------------
+export interface FormDropOptions {
+	clChoiceDrop: IDropDown[];
+	clChoiceRadio: IDropDown[];
+	clChoiceCheck: IDropDown[];
+}
+
+export interface DescriptionUrl {
+	Description: string;
+	Url: string;
+}
+
+//---------------------------
 export interface CustomListItem {
 	// "odata.metadata": string;
 	// "odata.type": string;
@@ -6,12 +25,10 @@ export interface CustomListItem {
 	// "odata.etag": string;
 	// "odata.editLink": string;
 	// FileSystemObjectType: number;
-	Id: number;
 	// ServerRedirectedEmbedUri: null | string;
 	// ServerRedirectedEmbedUrl: string;
 	// ID: number;
 	// ContentTypeId: string;
-	Title: string;
 	// Modified: string;
 	// Created: string;
 	// AuthorId: number;
@@ -21,6 +38,8 @@ export interface CustomListItem {
 	// GUID: string;
 	// OData__ColorTag: null | string;
 	// ComplianceAssetId: null | string;
+	Id: number;
+	Title: string;
 
 	clSingleText: string;
 	clMultiLinesEnhance: string;
@@ -39,14 +58,9 @@ export interface CustomListItem {
 	clPersonGroupStringId: string;
 	clPersonMultiId: number[];
 	clPersonMultiStringId: string[];
-	clLink: {
-		Description: string;
-		Url: string;
-	};
-	clPicture: {
-		Description: string;
-		Url: string;
-	};
+
+	clLink: DescriptionUrl;
+	clPicture: DescriptionUrl;
 	clImage: string;
 	clTaskOutcome: string;
 	clCalculated: string;
