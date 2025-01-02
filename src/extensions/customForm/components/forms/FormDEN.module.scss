@@ -1,5 +1,14 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
+// Remove spin from text field
+// input[type="number"],
+// input[type="number"]::-webkit-outer-spin-button,
+// input[type="number"]::-webkit-inner-spin-button {
+// 	margin: 0;
+// 	-moz-appearance: textfield;
+// 	appearance: none;
+// }
+
 // Default styles section
 // .formDEN {
 // 	overflow: hidden;
@@ -39,3 +48,7 @@
 	// @include ms-fontSize-20;
 }
 
+.btnPicker {
+	@include ms-fontSize-18;
+	font-weight: 600;
+}

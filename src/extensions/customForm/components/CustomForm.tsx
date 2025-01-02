@@ -62,14 +62,15 @@ export default class CustomForm extends React.Component<ICustomFormProps, ICusto
 		// const optionsDrop = await this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceDrop');
 		// console.log('optionsDrop:', optionsDrop);
 
-		const [optionsCheck, optionsRadio, optionsDrop] = await Promise.all([
+		// const [optionsCheck, optionsRadio, optionsDrop] =
+		await Promise.all([
 			this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceCheck'),
 			this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceRadio'),
 			this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceDrop')
 		]);
-		console.log('optionsCheck:', optionsCheck);
-		console.log('optionsRadio:', optionsRadio);
-		console.log('optionsDrop:', optionsDrop);
+		// console.log('optionsCheck:', optionsCheck);
+		// console.log('optionsRadio:', optionsRadio);
+		// console.log('optionsDrop:', optionsDrop);
 
 		if (this.props.displayMode === FormDisplayMode.New) {
 			// we're creating a new item so nothing to load
@@ -165,17 +166,9 @@ export default class CustomForm extends React.Component<ICustomFormProps, ICusto
 
 	private loadItemById = async (listGuid: string, itemId: number): Promise<CustomListItem> => {
 		// console.log('getItem:', listGuid, '\nitemId:', itemId);
-		// this.getListFields(listGuid).then(customFields => {
-		// 	customFields.forEach(field => {
-		// 		//console.log(`Field ${field.TypeAsString}: ${field.Title}`);
-		// 		console.log(`${field.Title}: ${field.TypeAsString}`);
-		// 	});
-		// }).catch(error => {console.error('Error getting fields:', error);});
 
 		const item: CustomListItem = await this.spFI.web.lists.getById(listGuid).items.getById(itemId)();
-
 		return Promise.resolve(item);
-		// throw new Error('Function not implemented.');
 	}
 
 	// private validateForm = async (ev: React.FormEvent<HTMLFormElement>): Promise<void> => {
@@ -225,13 +218,16 @@ export default class CustomForm extends React.Component<ICustomFormProps, ICusto
 	}
 
 	private saveItem = async (): Promise<void> => {
-		console.log('saveItem:', this.state);
-		// const { childState: { Title, clSingleText, clMultiLinesPlain, clMultiLinesEnhance } } = this.state;
 		const {
 			Title,
 			clSingleText, clMultiLinesPlain, clMultiLinesEnhance,
-			clChoiceDrop, clChoiceRadio, clChoiceCheck
+			clChoiceDrop, clChoiceRadio, clChoiceCheck,
+			clNumber, clCurrency, clDate, clDateTime, clYesNo,
+			// clPerson, clPersonGroup, clPersonMulti,
+			clPersonId, clPersonGroupId, clPersonMultiId
+			// clLink, clPicture, clTaskOutcome
 		} = this.state.childState;
+		console.log('saveItem:', this.state);
 
 		const spList = this.spFI.web.lists.getById(this.props.listGuid.toString());
 		// const item =
@@ -240,13 +236,22 @@ export default class CustomForm extends React.Component<ICustomFormProps, ICusto
 			clSingleText: clSingleText,
 			clMultiLinesEnhance: clMultiLinesEnhance,
 			clMultiLinesPlain: clMultiLinesPlain,
-
 			clChoiceDrop: clChoiceDrop.key,
 			clChoiceRadio: clChoiceRadio.key,
-			clChoiceCheck: clChoiceCheck.map((item) => item.key)
+			clChoiceCheck: clChoiceCheck.map((item) => item.key),
+			clNumber: clNumber,
+			clCurrency: clCurrency,
+			clDate: clDate,
+			clDateTime: clDateTime,
+			clYesNo: clYesNo,
+			clPersonId: clPersonId,
+			clPersonGroupId: clPersonGroupId,
+			clPersonMultiId: clPersonMultiId,
+			// clPerson: clPerson,
+			// clPersonGroup: clPersonGroup,
+			// clPersonMulti: clPersonMulti,
 		});
 		// console.log('item:', item);
-		// this.props.onClose();
 			await this.props.onSave();
 	}
 
@@ -285,9 +290,6 @@ export default class CustomForm extends React.Component<ICustomFormProps, ICusto
 						)}
 						{displayMode === FormDisplayMode.Display && (
 							<FormDisplay
-								// dataProvider={{
-								// 	getItem: (listGuid: string, itemId: number) => this.getItem(listGuid, itemId)
-								// }}
 								getItem={(listGuid: string, itemId: number) => this.loadItemById(listGuid, itemId)}
 								{...this.props}
 							/>

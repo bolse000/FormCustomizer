@@ -80,6 +80,15 @@ export class UsersInfoGraphSPO {
 		return user.Id;
 	}
 
+	public static async getUserById(userId: number): Promise<ISiteUserInfo> {
+		const spFI = getSP();
+
+		const user = await spFI.web.siteUsers.getById(userId)();
+		// console.log('user:', user);
+		return user;
+		//return user.Email;
+	}
+
 	/**
 	 * Gets user properties for the specified user, add user mail for memberOf.
 	 * @param context

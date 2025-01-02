@@ -9,7 +9,17 @@ import { RichText } from "@pnp/spfx-controls-react/lib/RichText";
 // import { SPFI } from '@pnp/sp/fi';
 // import { getSP } from '../../../../common/utils/PnpSetup';
 import { Dropdown, IDropdownOption } from '@fluentui/react/lib/Dropdown';
-import { min } from 'lodash';
+import { DatePicker } from '@fluentui/react/lib/DatePicker';
+import { DatePickerStrings } from '../../../../common/utils/DatePickerStrings';
+import { SaqUtils } from '../../../../common/utils/SaqUtils';
+import { TimePicker } from '@fluentui/react/lib/TimePicker';
+import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
+import { Toggle } from '@fluentui/react/lib/Toggle';
+import { IPersonaProps } from '@fluentui/react/lib/Persona';
+// import { Label } from '@fluentui/react/lib/Label';
+// import { FieldUrlRenderer } from '@pnp/spfx-controls-react/lib/FieldUrlRenderer';
+// import { FilePicker, IFilePickerResult } from '@pnp/spfx-controls-react/lib/FilePicker';
+import { UsersInfoGraphSPO } from '../../../../common/services/UsersInfoGraphSPO';
 
 
 export default class FormEdit extends React.Component<IEditProps, IFormState> {
@@ -19,6 +29,7 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
 		{ key: 'Enter Choice #2', text: 'Enter Choice #2' },
 		{ key: 'Enter Choice #3', text: 'Enter Choice #3' }
 	];
+	private readonly peoplePickerContext = SaqUtils.setPeoplePickerContext(this.props.context);
 
 	constructor(props: IEditProps) {
 		super(props);
@@ -41,18 +52,16 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
 			clDate: new Date(),
 			clDateTime: new Date(),
 			clYesNo: false,
-			clPerson: '',
-			clPersonGroup: '',
+			clPerson: [],
+			clPersonGroup: [],
 			clPersonMulti: [],
-			clLink: '',
-			clPicture: '',
-			clImage: '',
+			clLink: { Description: '', Url: '' },
+			clPicture: { Description: '', Url: '' },
+			clImage: {
+				problemFilePick: undefined,
+			},
 			clTaskOutcome: { key: '', text: '' }
-
-			// childState: {}
 		};
-
-		// this.spFI = getSP();
 	}
 
 
@@ -78,6 +87,47 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
       this.props.onStateChange(this.state);
     }
   }
+
+	private setFormItem = async (): Promise<void> => {
+		const { listGuid, itemId } = this.props;
+		const item = await this.props.getItem(listGuid.toString(), itemId);
+		// console.log('loadItem:', item);
+
+		const getMail = async (someId: number): Promise<string[]> => {
+			const user = UsersInfoGraphSPO.getUserById(someId);
+			const mail = user.then((item) => [item.Email]);
+			return mail;
+			// return UsersInfoGraphSPO.getUserById(someId);
+		};
+		const mailPerson = await getMail(item.clPersonId);
+		const mailPersonGroup = await getMail(item.clPersonGroupId);
+		const mailPersonMulti = await Promise.all(item.clPersonMultiId.map((item) => getMail(item)));
+
+		this.setState({
+			Title: item.Title,
+			clSingleText: item.clSingleText,
+			clMultiLinesEnhance: item.clMultiLinesEnhance,
+			clMultiLinesPlain: item.clMultiLinesPlain,
+			clChoiceDrop: { key: item.clChoiceDrop, text: item.clChoiceDrop },
+			clChoiceRadio: { key: item.clChoiceRadio, text: item.clChoiceRadio },
+			clChoiceCheck: item.clChoiceCheck.map((item) => ({ key: item, text: item })),
+			clNumber: item.clNumber,
+			clCurrency: item.clCurrency,
+			clDate: new Date(item.clDate),
+			clDateTime: new Date(item.clDateTime),
+			clYesNo: item.clYesNo,
+			clPerson: mailPerson,
+			clPersonId: item.clPersonId,
+			clPersonGroup: mailPersonGroup,
+			clPersonGroupId: item.clPersonGroupId,
+			clPersonMulti: mailPersonMulti.flat(),
+			clPersonMultiId: item.clPersonMultiId,
+			clLink: item.clLink,
+			clPicture: item.clPicture,
+		}
+			, () => { console.log('setFormItem:', this.state) }
+		);
+	}
 	//#endregion
 
 
@@ -98,6 +148,11 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
 		ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, someValue?: string | undefined
 	): void => {
 		this.setState({ clMultiLinesPlain: someValue || '' });
+	}
+
+	private onSelectDateProblem = (someValue: Date): void => {
+		// console.log('DatePicker:', someValue);
+		this.setState({ clDate: someValue });
 	}
 
 	private chgRichText = (someText: string): string => {
@@ -150,6 +205,65 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
 			}));
 		}
 	}
+
+	private onTimePicker = (someDate: Date | null | undefined, target: string): void => {
+		// console.log('TimePicker:', someDate);
+
+		if (someDate) {
+			this.setState((prevState) => ({
+				...prevState,
+				[target]: someDate
+			}));
+		}
+	}
+
+	private chgToggle = (ev: React.MouseEvent<HTMLElement>, checked: boolean): void => {
+		// console.log('TogType is:', checked);
+		// this.setState({ clYesNo: checked });
+
+    const { id } = ev.target as HTMLInputElement;
+		this.setState((prevState) => ({
+			...prevState,
+			[id]: checked
+		}));
+	}
+
+	private handlePeoplePicker = async (someEmp: IPersonaProps[], target: string): Promise<void> => {
+		// console.log('someEmp:', someEmp);
+
+		try {
+			if (!Array.isArray(someEmp) || (!someEmp.length)) return;
+
+			const empId: number[] = [];
+			someEmp.map((employee) => {
+				empId.push(Number(employee.id) || 0);
+			});
+
+			this.setState((prevState) => ({
+				...prevState,
+				[target]: someEmp.map((item: IPersonaProps) => item.secondaryText || ''),
+				[`${target}Id`]: empId.length === 1 ? empId[0] : empId
+			}));
+		}
+		catch (error) {
+			console.error('error:', error);
+		}
+	}
+
+	// private onFilePickerSave = async (someFile: IFilePickerResult[]): Promise<void> => {
+	// 	console.log('someFile:', someFile);
+	// 	try {
+	// 		if (!Array.isArray(someFile) || (!someFile.length)) return;
+
+	// 		const file = someFile[0];
+	// 		this.setState({
+	// 			clImage: file.downloadFileContent()
+	// 		});
+	// 	}
+	// 	catch (error) {
+	// 		console.error('error:', error);
+	// 	}
+	// }
 	//#endregion
 
 
@@ -183,31 +297,18 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
 	// 	// this.props.onClose();
 	// }
 
-	private setFormItem = async (): Promise<void> => {
-		const { listGuid, itemId } = this.props;
-		// const item: CustomListItem = await this.props.dataProvider.getItem(listGuid.toString(), itemId);
-		const item = await this.props.getItem(listGuid.toString(), itemId);
-		// console.log('loadItem:', item);
-
-		this.setState({
-			Title: item.Title,
-			clSingleText: item.clSingleText,
-			clMultiLinesEnhance: item.clMultiLinesEnhance,
-			clMultiLinesPlain: item.clMultiLinesPlain,
-			clChoiceDrop: { key: item.clChoiceDrop, text: item.clChoiceDrop },
-			clChoiceRadio: { key: item.clChoiceRadio, text: item.clChoiceRadio },
-			clChoiceCheck: item.clChoiceCheck.map((item) => ({ key: item, text: item }))
-		});
-	}
-
 
 	public render(): React.ReactElement<IEditProps> {
 		const { displayMode, itemId, listGuid } = this.props;
 		const {
 			isFormDisabled, Title,
 			clSingleText, clMultiLinesPlain, clMultiLinesEnhance,
-			clChoiceDrop, clChoiceRadio, clChoiceCheck
+			clChoiceDrop, clChoiceRadio, clChoiceCheck,
+			clNumber, clCurrency, clDate, clDateTime,
+			clPerson, clPersonGroup, clPersonMulti, clYesNo,
+			// clLink, clPicture, clTaskOutcome
 		} = this.state;
+		// console.log('state:', this.state);
 
 		return (<>
 			{/* <form onSubmit={this.validateForm}> */}
@@ -313,20 +414,135 @@ export default class FormEdit extends React.Component<IEditProps, IFormState> {
 					</div>
 				</div>
 				<div className={styles.row}>
-					<div className='ms-Grid-col ms-lg6'>
+					<div className='ms-Grid-col ms-lg2'>
 						<TextField
 							type='number'
+							name='clNumber'
 							label={'clNumber'}
 							// className={styles.textQty}
 							required
 							min={1}
-							// value={productQuantity}
-							// onChange={this.chgProductQty}
+							disabled={isFormDisabled}
+							value={clNumber.toString()}
+							onChange={this.chgField}
 						/>
 					</div>
-					<div className='ms-Grid-col ms-lg6'>
+					<div className='ms-Grid-col ms-lg2'>
+						<TextField
+							type='number'
+							name='clCurrency'
+							label={'clCurrency'}
+							// className={styles.textQty}
+							required
+							min={1}
+							step={0.01}
+							disabled={isFormDisabled}
+							value={clCurrency.toString()}
+							onChange={this.chgField}
+						/>
+					</div>
+					<div className='ms-Grid-col ms-lg3'>
+						<DatePicker
+							label={'clDate'}
+							placeholder={'fieldLabel.dpHolder'}
+							allowTextInput
+							isRequired
+							disabled={isFormDisabled}
+							strings={DatePickerStrings}
+							formatDate={(someDate) => SaqUtils.formatDate(someDate)}
+							onSelectDate={(someDate) => this.onTimePicker(someDate, 'clDate')}
+							// onSelectDate={this.onSelectDateProblem}
+							value={new Date(clDate)}
+						/>
+					</div>
+					<div className='ms-Grid-col ms-lg5'>
+						<div style={{ display: 'grid', gridTemplateColumns: '3fr 3fr', gridColumnGap: '3px' }}>
+							<DatePicker
+								label={'clDateTime'}
+								placeholder={'fieldLabel.dpHolder'}
+								allowTextInput
+								isRequired
+								isMonthPickerVisible={false}
+								showGoToToday={false}
+								disabled={isFormDisabled}
+								formatDate={(someDate: Date) => SaqUtils.formatDate(someDate, false)}
+								onSelectDate={(someDate) => this.onTimePicker(someDate, 'clDateTime')}
+								value={new Date(clDateTime)}
+								// style={{ width: '50%' }}
+							/>
+							<TimePicker
+								label={'Time'}
+								placeholder={'fieldLabel.tpHolder'}
+								increments={15}
+								timeRange={{start: 7, end: 24}}
+								disabled={isFormDisabled}
+								onChange={((ev, time) => this.onTimePicker(time, 'clDateTime'))}
+								value={clDateTime}
+								// style={{ width: '50%' }}
+							/>
+						</div>
 					</div>
 				</div>
+				<div className={styles.row}>
+					<div className='ms-Grid-col ms-lg2'>
+						<Toggle
+							id='clYesNo'
+							label={'clYesNo'}
+							disabled={isFormDisabled}
+							onText={'Yes'}
+							offText={'no'}
+							onChange={this.chgToggle}
+							checked={clYesNo}
+						/>
+					</div>
+					<div className='ms-Grid-col ms-lg3'>
+						<PeoplePicker
+							context={this.peoplePickerContext}
+							titleText={'clPerson'}
+							placeholder={'Select a person...'}
+							disabled={isFormDisabled}
+							ensureUser={true}
+							personSelectionLimit={1}
+							required={true}
+							showtooltip={true}
+							principalTypes={[PrincipalType.User]}
+							defaultSelectedUsers={clPerson}
+							onChange={(items) => this.handlePeoplePicker(items, 'clPerson')}
+						/>
+					</div>
+					<div className='ms-Grid-col ms-lg3'>
+						<PeoplePicker
+							context={this.peoplePickerContext}
+							titleText={'clPersonGroup'}
+							placeholder={'Select a person...'}
+							disabled={isFormDisabled}
+							ensureUser={true}
+							personSelectionLimit={1}
+							required={true}
+							showtooltip={true}
+							principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup, PrincipalType.DistributionList]}
+							defaultSelectedUsers={clPersonGroup}
+							onChange={(items) => this.handlePeoplePicker(items, 'clPersonGroup')}
+						/>
+					</div>
+					<div className='ms-Grid-col ms-lg4'>
+						<PeoplePicker
+							context={this.peoplePickerContext}
+							titleText={'clPersonMulti'}
+							placeholder={'Select a person...'}
+							disabled={isFormDisabled}
+							ensureUser={true}
+							personSelectionLimit={10}
+							required={true}
+							showtooltip={true}
+							principalTypes={[PrincipalType.User]}
+							defaultSelectedUsers={clPersonMulti}
+							onChange={(items) => this.handlePeoplePicker(items, 'clPersonMulti')}
+						/>
+					</div>
+					{/* <div className='ms-Grid-col ms-lg1' /> */}
+				</div>
+
 				<div className={styles.row}>
 					<div className='ms-Grid-col ms-lg6'>
 						Hey!

@@ -1,5 +1,11 @@
 import { IDropdownOption } from "@fluentui/react/lib/Dropdown";
 // import { IFormState } from "../ICustomFormState";
+import { IFilePickerResult } from "@pnp/spfx-controls-react/lib/FilePicker";
+
+export interface IProblemImage {
+	problemFilePick?: IFilePickerResult[];
+	problemFile?: File[];
+}
 
 export interface IFormState {
 	isFormDisabled: boolean;
@@ -17,12 +23,23 @@ export interface IFormState {
 	clCurrency: number;
 	clDate: Date;
 	clDateTime: Date;
+
 	clYesNo: boolean;
-	clPerson: string;
-	clPersonGroup: string;
+	clPerson: string[];
+	clPersonId?: number;
+	clPersonGroup: string[];
+	clPersonGroupId?: number;
 	clPersonMulti: string[];
-	clLink: string;
-	clPicture: string;
-	clImage: string;
+	clPersonMultiId?: number[];
+
+	clLink: {
+		Description: string;
+		Url: string;
+	};
+	clPicture: {
+		Description: string;
+		Url: string;
+	};
+	clImage: IProblemImage;
 	clTaskOutcome: IDropdownOption;
 }

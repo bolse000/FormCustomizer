@@ -1,13 +1,23 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 
 import { MSGraphClientV3 } from '@microsoft/sp-http';
+import { FormCustomizerContext } from '@microsoft/sp-listview-extensibility';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 // import * as MSGraph from '@microsoft/microsoft-graph-types';
 
 import { HttpRequestError } from "@pnp/queryable";
+import { IPeoplePickerContext } from '@pnp/spfx-controls-react/lib/controls/peoplepicker';
 
 
 export class SaqUtils {
+	//
+	public static setPeoplePickerContext = (someContext: FormCustomizerContext): IPeoplePickerContext => {
+		return {
+			absoluteUrl: someContext.pageContext.web.absoluteUrl,
+			msGraphClientFactory: someContext.msGraphClientFactory,
+			spHttpClient: someContext.spHttpClient
+		};
+	};
 
 	/**
 	 * Log and return a formatted error message.
@@ -174,8 +184,10 @@ export class SaqUtils {
 	 * @param longFormat boolean
 	 * @returns 2023-10-02 | lun. 02 octobre 2023
 	 */
-	public static formatDate = (someDate: Date | string, longFormat?: boolean): string => {
+	public static formatDate = (someDate: Date | string | undefined, longFormat?: boolean): string => {
 		// console.log('typeof:', typeof someDate, 'someDate:', someDate);
+
+		if (!someDate) return "";
 
 		const dtNew: Date = new Date(someDate);
 		// console.log('dtNew:', dtNew);
