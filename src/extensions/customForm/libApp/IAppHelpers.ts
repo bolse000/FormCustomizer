@@ -1,23 +1,5 @@
 // Application Interfaces
 //---------------------------
-export interface IDropDown {
-	key: string;
-	text: string;
-}
-
-//---------------------------
-export interface FormDropOptions {
-	clChoiceDrop: IDropDown[];
-	clChoiceRadio: IDropDown[];
-	clChoiceCheck: IDropDown[];
-}
-
-export interface DescriptionUrl {
-	Description: string;
-	Url: string;
-}
-
-//---------------------------
 export interface CustomListItem {
 	// "odata.metadata": string;
 	// "odata.type": string;
@@ -64,4 +46,22 @@ export interface CustomListItem {
 	clImage: string;
 	clTaskOutcome: string;
 	clCalculated: string;
+}
+
+//---------------------------
+export interface IDropDown {
+	key: string;
+	text: string;
+}
+
+//---------------------------
+export interface FormDropOptions {
+	clChoiceDrop: IDropDown[];
+	clChoiceRadio: IDropDown[];
+	clChoiceCheck: IDropDown[];
+}
+
+export interface DescriptionUrl {
+	Description: string;
+	Url: string;
 }

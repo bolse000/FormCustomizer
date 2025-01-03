@@ -5,9 +5,6 @@ import { IFormProps } from './IFormProps';
 import { IFormState } from './IFormState';
 import { TextField } from '@fluentui/react/lib/TextField';
 import { RichText } from "@pnp/spfx-controls-react/lib/RichText";
-// import { CustomListItem } from '../../libApp/IAppHelpers';
-// import { SPFI } from '@pnp/sp/fi';
-// import { getSP } from '../../../../common/utils/PnpSetup';
 import { Dropdown, IDropdownOption } from '@fluentui/react/lib/Dropdown';
 import { DatePicker } from '@fluentui/react/lib/DatePicker';
 import { DatePickerStrings } from '../../../../common/utils/DatePickerStrings';
@@ -16,28 +13,23 @@ import { TimePicker } from '@fluentui/react/lib/TimePicker';
 import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { Toggle } from '@fluentui/react/lib/Toggle';
 import { IPersonaProps } from '@fluentui/react/lib/Persona';
-// import { Label } from '@fluentui/react/lib/Label';
 // import { FieldUrlRenderer } from '@pnp/spfx-controls-react/lib/FieldUrlRenderer';
 // import { FilePicker, IFilePickerResult } from '@pnp/spfx-controls-react/lib/FilePicker';
 import { UsersInfoGraphSPO } from '../../../../common/services/UsersInfoGraphSPO';
-import { FormDropOptions } from '../../libApp/IAppHelpers';
+import { CustomListItem, FormDropOptions } from '../../libApp/IAppHelpers';
 import { FormDisplayMode } from '@microsoft/sp-core-library';
 
 
 export default class FormDisplayEdit extends React.Component<IFormProps, IFormState> {
-	// private spFI: SPFI;
-	// private ddOptions: IDropdownOption[] = [
-	// 	{ key: 'Enter Choice #1', text: 'Enter Choice #1' },
-	// 	{ key: 'Enter Choice #2', text: 'Enter Choice #2' },
-	// 	{ key: 'Enter Choice #3', text: 'Enter Choice #3' }
-	// ];
+	//
+	private readonly peoplePickerContext = SaqUtils.setPeoplePickerContext(this.props.context);
 	private ddOptions: FormDropOptions = {
 		clChoiceDrop: [{ key: '', text: '' }],
 		clChoiceRadio: [{ key: '', text: '' }],
 		clChoiceCheck: [{ key: '', text: '' }]
 	};
-	private readonly peoplePickerContext = SaqUtils.setPeoplePickerContext(this.props.context);
 
+	//#region Lifecycle
 	constructor(props: IFormProps) {
 		super(props);
 		// console.log('FormEdit:', props);
@@ -64,49 +56,28 @@ export default class FormDisplayEdit extends React.Component<IFormProps, IFormSt
 			clPersonMulti: [],
 			clLink: { Description: '', Url: '' },
 			clPicture: { Description: '', Url: '' },
-			clImage: {
-				problemFilePick: undefined,
-			},
+			clImage: { problemFilePick: undefined },
 			clTaskOutcome: { key: '', text: '' }
 		};
 	}
 
-
-	//#region Lifecycle
 	// Executed after component is rendered
 	public async componentDidMount(): Promise<void> {
 		console.time('FormEdit');
 
-		const item = await this.props.onDropOption();
+		const dropOptions = await this.props.onDropOption();
+		if (!dropOptions) return;
+
 		this.ddOptions = {
-			clChoiceCheck: item.clChoiceCheck,
-			clChoiceRadio: item.clChoiceRadio,
-			clChoiceDrop: item.clChoiceDrop
+			clChoiceCheck: dropOptions.clChoiceCheck,
+			clChoiceRadio: dropOptions.clChoiceRadio,
+			clChoiceDrop: dropOptions.clChoiceDrop
 		};
-		// this.ddOptions = {
-		// 	clChoiceCheck: item.clChoiceCheck.map((item) => ({ key: item, text: item })),
-		// 	clChoiceRadio: item.clChoiceRadio.map((item) => ({ key: item, text: item })),
-		// 	clChoiceDrop: item.clChoiceDrop.map((item) => ({ key: item, text: item }))
-		// };
-		// this.ddOptions = await this.props.onDropOption().then((item) => {
-		// 	const tmp = {
-		// 		'clChoiceCheck': item.clChoiceCheck.map((item) => ({ key: item, text: item })),
-		// 		'clChoiceRadio': item.clChoiceRadio.map((item) => ({ key: item, text: item })),
-		// 		'clChoiceDrop': item.clChoiceDrop.map((item) => ({ key: item, text: item }))
-		// 	};
-		// 	return tmp;
-		// 	// return item.clChoiceCheck.map((item) => ({ key: item, text: item }));
-		// }).catch((error) => {console.error('error:', error)});
+		// console.log('ddOptions:', this.ddOptions);
 
-		// console.log('props.ddOptions:', this.props.ddOptions);
-		// this.ddOptions = await this.props.onDropOption();
-		console.log('ddOptions:', this.ddOptions);
-
-		await this.setFormItem();
-		// if (this.props.displayMode === FormDisplayMode.New) {
-		// 	// we're creating a new item so nothing to load
-		// 	return Promise.resolve();
-		// }
+		const item = await this.getItemFromProps();
+		// console.log('getItemFromProps:', item);
+		await this.setFormItem(item);
 
 		console.timeEnd('FormEdit');
 	}
@@ -119,27 +90,20 @@ export default class FormDisplayEdit extends React.Component<IFormProps, IFormSt
       this.props.onStateChange(this.state);
     }
   }
+	//#endregion
 
-	private setFormItem = async (): Promise<void> => {
-		const getMail = async (someId: number): Promise<string[]> => {
-			const user = UsersInfoGraphSPO.getUserById(someId);
-			const mail = user.then((item) => [item.Email]);
-			return mail;
-			// return UsersInfoGraphSPO.getUserById(someId);
-		};
 
+	//#region Set Item
+	private async getItemFromProps(): Promise<CustomListItem> {
 		const { listGuid, itemId } = this.props;
 		const item = await this.props.onGetItem(listGuid.toString(), itemId);
-		// console.log('loadItem:', item);
 
-		const [mailPerson, mailPersonGroup, mailPersonMulti] = await Promise.all([
-			getMail(item.clPersonId),
-			getMail(item.clPersonGroupId),
-			Promise.all(item.clPersonMultiId.map((item) => getMail(item)))
-		]);
-		// const mailPerson = await getMail(item.clPersonId);
-		// const mailPersonGroup = await getMail(item.clPersonGroupId);
-		// const mailPersonMulti = await Promise.all(item.clPersonMultiId.map((item) => getMail(item)));
+		return item;
+	}
+
+	private setFormItem = async (item: CustomListItem): Promise<void> => {
+		// console.log('setFormItem:', item);
+		const [mailPerson, mailPersonGroup, mailPersonMulti] = await this.loadMailAddresses(item);
 
 		this.setState({
 			Title: item.Title,
@@ -165,52 +129,74 @@ export default class FormDisplayEdit extends React.Component<IFormProps, IFormSt
 			clLink: item.clLink,
 			clPicture: item.clPicture,
 		}
-			, () => { console.log('setFormItem:', this.state) }
+			// , () => { console.log('setFormItem:', this.state) }
 		);
+	}
+
+	private async loadMailAddresses(item: CustomListItem): Promise<[string[], string[], string[][]]> {
+		const getMail = async (someId: number): Promise<string[]> => {
+			try {
+				const user = await UsersInfoGraphSPO.getUserById(someId);
+				return user.Email ? [user.Email] : [];
+			} catch (error) {
+				console.error(`Error fetching user with ID ${someId}:`, error);
+				return [];
+			}
+		};
+
+		try {
+			return await Promise.all([
+				getMail(item.clPersonId),
+				getMail(item.clPersonGroupId),
+				Promise.all(item.clPersonMultiId.map((id) => getMail(id)))
+			]);
+		} catch (error) {
+			console.error('Error loading mail addresses:', error);
+			throw error;
+		}
+	}
+	private async loadMailAddressesX(item: CustomListItem): Promise<[string[], string[], string[][]]> {
+		const getMail = async (someId: number): Promise<string[]> => {
+			const user = await UsersInfoGraphSPO.getUserById(someId);
+			return user.Email ? [user.Email] : [];
+		};
+
+		try {
+			return await Promise.all([
+				getMail(item.clPersonId),
+				getMail(item.clPersonGroupId),
+				Promise.all(item.clPersonMultiId.map((id) => getMail(id)))
+			]);
+		}
+		catch (error) {
+			console.error('Error loading mail addresses:', error);
+			throw error;
+		}
 	}
 	//#endregion
 
 
 	//#region Field Change
-	private chgTitle = (
-		ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, someValue?: string | undefined
+	private chgField = (ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>,
+		someValue?: string | undefined
 	): void => {
-		this.setState({ Title: someValue || '' });
-	}
-
-	private clSingleText = (
-		ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, someValue?: string | undefined
-	): void => {
-		this.setState({ clSingleText: someValue || '' });
-	}
-
-	private clMultiLinesPlain = (
-		ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, someValue?: string | undefined
-	): void => {
-		this.setState({ clMultiLinesPlain: someValue || '' });
-	}
-
-	private onSelectDateProblem = (someValue: Date): void => {
-		// console.log('DatePicker:', someValue);
-		this.setState({ clDate: someValue });
-	}
-
-	private chgRichText = (someText: string): string => {
-		// console.log('chgRichText:', someText);
-		this.setState({ clMultiLinesEnhance: someText });
-		return someText;
-	}
-
-	private chgField = (
-		ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, someValue?: string | undefined
-	): void => {
-    const { name } = ev.target as HTMLInputElement;
-		// console.log('chgField:', name, '\nvalue:', someValue);
+    const { id } = ev.target as HTMLInputElement;
+		// console.log('chgField:', id, '\nvalue:', someValue);
 
 		this.setState((prevState) => ({
 			...prevState,
-			[name]: someValue || ''
+			[id]: someValue || ''
 		}));
+	}
+
+	private chgRichText = (someText: string, target: string): string => {
+		// console.log('chgRichText:', someText);
+
+		this.setState((prevState) => ({
+			...prevState,
+			[target]: someText || ''
+		}));
+		return someText;
 	}
 
 	private chgDropdown = (ev: React.FormEvent<HTMLDivElement>,
@@ -246,7 +232,7 @@ export default class FormDisplayEdit extends React.Component<IFormProps, IFormSt
 		}
 	}
 
-	private onTimePicker = (someDate: Date | null | undefined, target: string): void => {
+	private chgDateTimePicker = (someDate: Date | null | undefined, target: string): void => {
 		// console.log('TimePicker:', someDate);
 
 		if (someDate) {
@@ -259,7 +245,6 @@ export default class FormDisplayEdit extends React.Component<IFormProps, IFormSt
 
 	private chgToggle = (ev: React.MouseEvent<HTMLElement>, checked: boolean): void => {
 		// console.log('TogType is:', checked);
-		// this.setState({ clYesNo: checked });
 
     const { id } = ev.target as HTMLInputElement;
 		this.setState((prevState) => ({
@@ -268,7 +253,7 @@ export default class FormDisplayEdit extends React.Component<IFormProps, IFormSt
 		}));
 	}
 
-	private handlePeoplePicker = async (someEmp: IPersonaProps[], target: string): Promise<void> => {
+	private chgPeoplePicker = async (someEmp: IPersonaProps[], target: string): Promise<void> => {
 		// console.log('someEmp:', someEmp);
 
 		try {
@@ -307,41 +292,9 @@ export default class FormDisplayEdit extends React.Component<IFormProps, IFormSt
 	//#endregion
 
 
-	// private validateForm = async (ev: React.FormEvent<HTMLFormElement>): Promise<void> => {
-	// 	ev.preventDefault();
-	// 	console.log('props:', this.props);
-	// 	try {
-	// 		console.log('ev:', this.state);
-	// 		// const item = await this.spFI.web.lists.getById(this.props.listGuid).items.add(this.state);
-	// 		// console.log('item:', item);
-	// 		// this.props.onClose
-	// 		await this.saveItem();
-	// 		this.props.onClose();
-	// 	}
-	// 	catch (error) {
-	// 		console.error(error);
-	// 	}
-	// }
-
-	// private saveItem = async (): Promise<void> => {
-	// 	console.log('saveItem:', this.props);
-	// 	const { Title, clSingleText, clMultiLinesPlain, clMultiLinesEnhance } = this.state;
-	// 	const spList = this.spFI.web.lists.getById(this.props.listGuid.toString());
-	// 	const item = await spList.items.getById(this.props.itemId).update({
-	// 		Title: Title,
-	// 		clSingleText: clSingleText,
-	// 		clMultiLinesEnhance: clMultiLinesEnhance,
-	// 		clMultiLinesPlain: clMultiLinesPlain
-	// 	});
-	// 	console.log('item:', item);
-	// 	// this.props.onClose();
-	// }
-
-
 	public render(): React.ReactElement<IFormProps> {
 		const { displayMode, itemId, listGuid } = this.props;
-		const {
-			isFormDisabled, Title,
+		const { Title, isFormDisabled,
 			clSingleText, clMultiLinesPlain, clMultiLinesEnhance,
 			clChoiceDrop, clChoiceRadio, clChoiceCheck,
 			clNumber, clCurrency, clDate, clDateTime,
@@ -351,250 +304,250 @@ export default class FormDisplayEdit extends React.Component<IFormProps, IFormSt
 		// console.log('state:', this.state);
 
 		return (<>
-			{/* <form onSubmit={this.validateForm}> */}
-				<div className={styles.row}>
-					<div className='ms-Grid-col ms-lg2'>
-						<div className={styles.colX}>Edit-{displayMode}</div>
-					</div>
-					<div className='ms-Grid-col ms-lg4'>
-						<div className={styles.col}>listGuid: {listGuid.toString()}</div>
-					</div>
-					<div className='ms-Grid-col ms-lg4'>
-						<div className={styles.col}>itemId: {itemId}</div>
-					</div>
-					<div className='ms-Grid-col ms-lg2' />
+			<div className={styles.row}>
+				<div className='ms-Grid-col ms-lg2'>
+					<div className={styles.colX}>Edit-{displayMode}</div>
 				</div>
-				<div className={styles.row}>
-					<div className='ms-Grid-col ms-lg6'>
-						<TextField
-							name='Title'
-							label={'Title'}
-							placeholder={'Inscrire le titre'}
-							autoFocus
-							required
-							value={Title}
-							onChange={this.chgField}
-							disabled={isFormDisabled}
-						/>
-					</div>
-					<div className='ms-Grid-col ms-lg6'>
-						<TextField
-							name='clSingleText'
-							label={'clSingleText'}
-							placeholder={'Inscrire la valeur'}
-							required
-							value={clSingleText}
-							onChange={this.chgField}
-							disabled={isFormDisabled}
-						/>
-					</div>
+				<div className='ms-Grid-col ms-lg4'>
+					<div className={styles.col}>listGuid: {listGuid.toString()}</div>
 				</div>
-				<div className={styles.row}>
-					<div className='ms-Grid-col ms-lg6'>
-						<TextField
-							name='clMultiLinesPlain'
-							label={'clMultiLinesPlain'}
-							placeholder={'Inscrire la valeur'}
-							required
-							multiline
-							rows={5}
-							value={clMultiLinesPlain}
-							onChange={this.chgField}
-							disabled={isFormDisabled}
-						/>
-					</div>
-					<div className='ms-Grid-col ms-lg6'>
-						<RichText id='clMultiLinesEnhance'
-							label={'clMultiLinesEnhance'}
-							placeholder={'Inscrire la valeur'}
-							value={clMultiLinesEnhance}
-							onChange={this.chgRichText}
-							isEditMode={!isFormDisabled}
-							// style={{ height: '200px' }}
-						/>
-					</div>
+				<div className='ms-Grid-col ms-lg4'>
+					<div className={styles.col}>itemId: {itemId}</div>
 				</div>
-				<div className={styles.row}>
-					<div className='ms-Grid-col ms-lg4'>
-						<Dropdown
-							id='clChoiceDrop'
-							label={'clChoiceDrop'}
-							placeholder={'Select an option'}
-							required
-							disabled={isFormDisabled}
-							selectedKey={clChoiceDrop.key}
-							onChange={this.chgDropdown}
-							options={this.ddOptions.clChoiceDrop}
-							// options={this.ddOptions ? this.ddOptions.clChoiceDrop : []}
-						/>
-					</div>
-					<div className='ms-Grid-col ms-lg4'>
-						<Dropdown
-							id='clChoiceRadio'
-							label={'clChoiceRadio'}
-							placeholder={'Select an option'}
-							required
-							disabled={isFormDisabled}
-							selectedKey={clChoiceRadio.key}
-							onChange={this.chgDropdown}
-							options={this.ddOptions.clChoiceRadio}
-							// options={this.ddOptions ? this.ddOptions.clChoiceRadio : []}
-						/>
-					</div>
-					<div className='ms-Grid-col ms-lg4'>
-						<Dropdown
-							id='clChoiceCheck'
-							label={'clChoiceCheck'}
-							placeholder={'Select an option'}
-							required
-							multiSelect
-							disabled={isFormDisabled}
-							selectedKeys={clChoiceCheck.map((item) => item.key as string)}
-							onChange={this.chgDropdownMulti}
-							options={this.ddOptions.clChoiceCheck}
-							// options={this.ddOptions ? this.ddOptions.clChoiceCheck : []}
-						/>
-					</div>
+				<div className='ms-Grid-col ms-lg2' />
+			</div>
+			<div className={styles.row}>
+				<div className='ms-Grid-col ms-lg4'>
+					<TextField
+						id='Title'
+						label={'Title'}
+						placeholder={'Inscrire le titre'}
+						autoFocus
+						required
+						disabled={isFormDisabled}
+						value={Title}
+						onChange={this.chgField}
+					/>
 				</div>
-				<div className={styles.row}>
-					<div className='ms-Grid-col ms-lg2'>
-						<TextField
-							type='number'
-							name='clNumber'
-							label={'clNumber'}
-							// className={styles.textQty}
-							required
-							min={1}
-							disabled={isFormDisabled}
-							value={clNumber.toString()}
-							onChange={this.chgField}
-						/>
-					</div>
-					<div className='ms-Grid-col ms-lg2'>
-						<TextField
-							type='number'
-							name='clCurrency'
-							label={'clCurrency'}
-							// className={styles.textQty}
-							required
-							min={1}
-							step={0.01}
-							disabled={isFormDisabled}
-							value={clCurrency.toString()}
-							onChange={this.chgField}
-						/>
-					</div>
-					<div className='ms-Grid-col ms-lg3'>
+				<div className='ms-Grid-col ms-lg4'>
+					<TextField
+						id='clSingleText'
+						label={'clSingleText'}
+						placeholder={'Inscrire la valeur'}
+						required
+						disabled={isFormDisabled}
+						value={clSingleText}
+						onChange={this.chgField}
+					/>
+				</div>
+				<div className='ms-Grid-col ms-lg2'>
+					<TextField
+						type='number'
+						id='clNumber'
+						label={'clNumber'}
+						// className={styles.textQty}
+						min={1}
+						required
+						disabled={isFormDisabled}
+						value={clNumber.toString()}
+						onChange={this.chgField}
+					/>
+				</div>
+				<div className='ms-Grid-col ms-lg2'>
+					<TextField
+						type='number'
+						id='clCurrency'
+						label={'clCurrency'}
+						// className={styles.textQty}
+						min={1}
+						step={0.01}
+						required
+						disabled={isFormDisabled}
+						value={clCurrency.toString()}
+						onChange={this.chgField}
+					/>
+				</div>
+			</div>
+			<div className={styles.row}>
+				<div className='ms-Grid-col ms-lg6'>
+					<TextField
+						id='clMultiLinesPlain'
+						label={'clMultiLinesPlain'}
+						placeholder={'Inscrire la valeur'}
+						multiline
+						rows={5}
+						required
+						disabled={isFormDisabled}
+						value={clMultiLinesPlain}
+						onChange={this.chgField}
+					/>
+				</div>
+				<div className='ms-Grid-col ms-lg6'>
+					<RichText
+						id='clMultiLinesEnhance'
+						label={'clMultiLinesEnhance'}
+						placeholder={'Inscrire la valeur'}
+						isEditMode={!isFormDisabled}
+						value={clMultiLinesEnhance}
+						onChange={(text) => this.chgRichText(text, 'clMultiLinesEnhance')}
+						className={isFormDisabled ? styles.disabled : ''}
+					/>
+				</div>
+			</div>
+			<div className={styles.row}>
+				<div className='ms-Grid-col ms-lg4'>
+					<Dropdown
+						id='clChoiceDrop'
+						label={'clChoiceDrop'}
+						placeholder={'Select an option'}
+						required
+						disabled={isFormDisabled}
+						options={this.ddOptions.clChoiceDrop}
+						selectedKey={clChoiceDrop.key}
+						onChange={this.chgDropdown}
+					/>
+				</div>
+				<div className='ms-Grid-col ms-lg4'>
+					<Dropdown
+						id='clChoiceRadio'
+						label={'clChoiceRadio'}
+						placeholder={'Select an option'}
+						required
+						disabled={isFormDisabled}
+						options={this.ddOptions.clChoiceRadio}
+						selectedKey={clChoiceRadio.key}
+						onChange={this.chgDropdown}
+					/>
+				</div>
+				<div className='ms-Grid-col ms-lg4'>
+					<Dropdown
+						id='clChoiceCheck'
+						label={'clChoiceCheck'}
+						placeholder={'Select an option'}
+						multiSelect
+						required
+						disabled={isFormDisabled}
+						options={this.ddOptions.clChoiceCheck}
+						selectedKeys={clChoiceCheck.map((item) => item.key as string)}
+						onChange={this.chgDropdownMulti}
+					/>
+				</div>
+			</div>
+			<div className={styles.row}>
+				<div className='ms-Grid-col ms-lg3'>
+					<Toggle
+						id='clYesNo'
+						label={'clYesNo'}
+						onText={'Yes'}
+						offText={'no'}
+						disabled={isFormDisabled}
+						checked={clYesNo}
+						onChange={this.chgToggle}
+					/>
+				</div>
+				<div className='ms-Grid-col ms-lg3'>
+					<DatePicker
+						id='clDate'
+						label={'clDate'}
+						placeholder={'fieldLabel.dpHolder'}
+						allowTextInput
+						isRequired
+						disabled={isFormDisabled}
+						strings={DatePickerStrings}
+						value={new Date(clDate)}
+						formatDate={(someDate) => SaqUtils.formatDate(someDate)}
+						onSelectDate={(someDate) => this.chgDateTimePicker(someDate, 'clDate')}
+					/>
+				</div>
+				<div className='ms-Grid-col ms-lg5'>
+					<div style={{ display: 'grid', gridTemplateColumns: '3fr 3fr', gridColumnGap: '3px' }}>
 						<DatePicker
-							label={'clDate'}
+							id='clDateTime'
+							label={'clDateTime'}
 							placeholder={'fieldLabel.dpHolder'}
+							isMonthPickerVisible={false}
+							showGoToToday={false}
 							allowTextInput
 							isRequired
 							disabled={isFormDisabled}
-							strings={DatePickerStrings}
-							formatDate={(someDate) => SaqUtils.formatDate(someDate)}
-							onSelectDate={(someDate) => this.onTimePicker(someDate, 'clDate')}
-							// onSelectDate={this.onSelectDateProblem}
-							value={new Date(clDate)}
+							// strings={DatePickerStrings}
+							value={new Date(clDateTime)}
+							formatDate={(someDate: Date) => SaqUtils.formatDate(someDate, false)}
+							onSelectDate={(someDate) => this.chgDateTimePicker(someDate, 'clDateTime')}
 						/>
-					</div>
-					<div className='ms-Grid-col ms-lg5'>
-						<div style={{ display: 'grid', gridTemplateColumns: '3fr 3fr', gridColumnGap: '3px' }}>
-							<DatePicker
-								label={'clDateTime'}
-								placeholder={'fieldLabel.dpHolder'}
-								allowTextInput
-								isRequired
-								isMonthPickerVisible={false}
-								showGoToToday={false}
-								disabled={isFormDisabled}
-								formatDate={(someDate: Date) => SaqUtils.formatDate(someDate, false)}
-								onSelectDate={(someDate) => this.onTimePicker(someDate, 'clDateTime')}
-								value={new Date(clDateTime)}
-								// style={{ width: '50%' }}
-							/>
-							<TimePicker
-								label={'Time'}
-								placeholder={'fieldLabel.tpHolder'}
-								increments={15}
-								timeRange={{start: 7, end: 24}}
-								disabled={isFormDisabled}
-								onChange={((ev, time) => this.onTimePicker(time, 'clDateTime'))}
-								value={clDateTime}
-								// style={{ width: '50%' }}
-							/>
-						</div>
+						<TimePicker
+							id='clDateTime-tp'
+							label={'Time'}
+							placeholder={'fieldLabel.tpHolder'}
+							increments={15}
+							timeRange={{start: 7, end: 24}}
+							disabled={isFormDisabled}
+							value={clDateTime}
+							onChange={((ev, time) => this.chgDateTimePicker(time, 'clDateTime'))}
+						/>
 					</div>
 				</div>
-				<div className={styles.row}>
-					<div className='ms-Grid-col ms-lg2'>
-						<Toggle
-							id='clYesNo'
-							label={'clYesNo'}
-							disabled={isFormDisabled}
-							onText={'Yes'}
-							offText={'no'}
-							onChange={this.chgToggle}
-							checked={clYesNo}
-						/>
-					</div>
-					<div className='ms-Grid-col ms-lg3'>
-						<PeoplePicker
-							context={this.peoplePickerContext}
-							titleText={'clPerson'}
-							placeholder={'Select a person...'}
-							disabled={isFormDisabled}
-							ensureUser={true}
-							personSelectionLimit={1}
-							required={true}
-							showtooltip={true}
-							principalTypes={[PrincipalType.User]}
-							defaultSelectedUsers={clPerson}
-							onChange={(items) => this.handlePeoplePicker(items, 'clPerson')}
-						/>
-					</div>
-					<div className='ms-Grid-col ms-lg3'>
-						<PeoplePicker
-							context={this.peoplePickerContext}
-							titleText={'clPersonGroup'}
-							placeholder={'Select a person...'}
-							disabled={isFormDisabled}
-							ensureUser={true}
-							personSelectionLimit={1}
-							required={true}
-							showtooltip={true}
-							principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup, PrincipalType.DistributionList]}
-							defaultSelectedUsers={clPersonGroup}
-							onChange={(items) => this.handlePeoplePicker(items, 'clPersonGroup')}
-						/>
-					</div>
-					<div className='ms-Grid-col ms-lg4'>
-						<PeoplePicker
-							context={this.peoplePickerContext}
-							titleText={'clPersonMulti'}
-							placeholder={'Select a person...'}
-							disabled={isFormDisabled}
-							ensureUser={true}
-							personSelectionLimit={10}
-							required={true}
-							showtooltip={true}
-							principalTypes={[PrincipalType.User]}
-							defaultSelectedUsers={clPersonMulti}
-							onChange={(items) => this.handlePeoplePicker(items, 'clPersonMulti')}
-						/>
-					</div>
-					{/* <div className='ms-Grid-col ms-lg1' /> */}
+				<div className='ms-Grid-col ms-lg1' />
+			</div>
+			<div className={styles.row}>
+				<div className='ms-Grid-col ms-lg3'>
+					<PeoplePicker
+						context={this.peoplePickerContext}
+						titleText={'clPerson'}
+						placeholder={'Select a person...'}
+						ensureUser={true}
+						personSelectionLimit={1}
+						showtooltip={true}
+						required={true}
+						disabled={isFormDisabled}
+						principalTypes={[PrincipalType.User]}
+						defaultSelectedUsers={clPerson}
+						onChange={(items) => this.chgPeoplePicker(items, 'clPerson')}
+					/>
 				</div>
+				<div className='ms-Grid-col ms-lg3'>
+					<PeoplePicker
+						context={this.peoplePickerContext}
+						titleText={'clPersonGroup'}
+						placeholder={'Select a person...'}
+						ensureUser={true}
+						personSelectionLimit={1}
+						showtooltip={true}
+						required={true}
+						disabled={isFormDisabled}
+						principalTypes={[
+							PrincipalType.User, PrincipalType.SharePointGroup,
+							PrincipalType.SecurityGroup, PrincipalType.DistributionList
+						]}
+						defaultSelectedUsers={clPersonGroup}
+						onChange={(items) => this.chgPeoplePicker(items, 'clPersonGroup')}
+					/>
+				</div>
+				<div className='ms-Grid-col ms-lg6'>
+					<PeoplePicker
+						context={this.peoplePickerContext}
+						titleText={'clPersonMulti'}
+						placeholder={'Select a person...'}
+						ensureUser={true}
+						personSelectionLimit={10}
+						showtooltip={true}
+						required={true}
+						disabled={isFormDisabled}
+						principalTypes={[PrincipalType.User]}
+						defaultSelectedUsers={clPersonMulti}
+						onChange={(items) => this.chgPeoplePicker(items, 'clPersonMulti')}
+					/>
+				</div>
+			</div>
 
-				<div className={styles.row}>
-					<div className='ms-Grid-col ms-lg6'>
-						Hey!
-					</div>
-					<div className='ms-Grid-col ms-lg6'>
-						I&apos;m a row!
-					</div>
+			<div className={styles.row}>
+				<div className='ms-Grid-col ms-lg6'>
+					Hey!
 				</div>
-			{/* </form> */}
+				<div className='ms-Grid-col ms-lg6'>
+					I&apos;m a row!
+				</div>
+			</div>
 		</>);
 	}
 }

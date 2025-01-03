@@ -27,10 +27,6 @@ require('@fluentui/react/dist/css/fabric.css');
 
 export default class CustomForm extends React.Component<ICustomFormProps, ICustomFormState> {
 	private spFI: SPFI;
-	// private ddOptions: string[][] = [];
-  // private pnpListItem: IItems;
-	// // Added for the item to show in the form; use with edit and view form
-	// private listItem: { Title?: string; };
 	// // Added for item's etag to ensure integrity of the update; used with edit form
 	// private etag?: string;
 
@@ -38,48 +34,15 @@ export default class CustomForm extends React.Component<ICustomFormProps, ICusto
 	constructor(props: ICustomFormProps) {
 		super(props);
 		// console.log('CustomForm:', props);
-
-		// this.state = {
-		// 	childState: {
-		// 		isFormDisabled: false,
-		// 		Title: '',
-		// 		clSingleText: '',
-		// 		clMultiLinesEnhance: '',
-		// 		clMultiLinesPlain: '',
-		// 	}
-		// };
-
 		this.spFI = getSP();
 	}
 
   public async componentDidMount(): Promise<void> {
 		console.time('CustomForm');
-
-		// this.loadListFields(this.context.list.guid.toString());
-		// const optionsCheck = await this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceCheck');
-		// console.log('optionsCheck:', optionsCheck);
-		// const optionsRadio = await this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceRadio');
-		// console.log('optionsRadio:', optionsRadio);
-		// const optionsDrop = await this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceDrop');
-		// console.log('optionsDrop:', optionsDrop);
-
-		// const [optionsCheck, optionsRadio, optionsDrop] =
-		// await Promise.all([
-		// 	this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceCheck'),
-		// 	this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceRadio'),
-		// 	this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceDrop')
-		// ]);
-		// console.log('optionsCheck:', optionsCheck);
-		// console.log('optionsRadio:', optionsRadio);
-		// console.log('optionsDrop:', optionsDrop);
-		// this.ddOptions = [optionsCheck, optionsRadio, optionsDrop];
-		// console.log('ddOptions:', this.ddOptions);
-
-		if (this.props.displayMode === FormDisplayMode.New) {
-			// we're creating a new item so nothing to load
-			return Promise.resolve();
-		}
-
+		// if (this.props.displayMode === FormDisplayMode.New) {
+		// 	// we're creating a new item so nothing to load
+		// 	return Promise.resolve();
+		// }
 		console.timeEnd('CustomForm');
   }
 
@@ -90,15 +53,15 @@ export default class CustomForm extends React.Component<ICustomFormProps, ICusto
 
 
 	private getCommandBarItems = (): ICommandBarItemProps[] => {
-    const cmdCancel: ICommandBarItemProps = {
-      key: 'cancelItem',
-      text: 'Cancel',
-      iconProps: { iconName: 'Cancel' },
-      onClick: () => this.props.onClose(),
-      className: styles.commandBarItems
-    };
+		const cmdCancel: ICommandBarItemProps = {
+			key: 'cancelItem',
+			text: 'Cancel',
+			iconProps: { iconName: 'Cancel' },
+			onClick: () => this.props.onClose(),
+			className: styles.commandBarItems
+		};
 
-		const cmdSave: ICommandBarItemProps[] = [
+		const cmdBarSave: ICommandBarItemProps[] = [
 			{
 				key: 'saveItem',
 				text: 'Save',
@@ -108,27 +71,19 @@ export default class CustomForm extends React.Component<ICustomFormProps, ICusto
 			cmdCancel
 		];
 
-    const cmdEdit: ICommandBarItemProps[] = [
-      {
-        key: 'EditItem',
-        text: 'Edit',
-        iconProps: { iconName: 'Edit' },
-        className: styles.commandBarItems,
-        onClick: () => this.onClickEditItem()
-      },
+		const cmdBarEdit: ICommandBarItemProps[] = [
+			{
+				key: 'EditItem',
+				text: 'Edit',
+				iconProps: { iconName: 'Edit' },
+				className: styles.commandBarItems,
+				onClick: () => this.onClickEditItem()
+			},
 			cmdCancel
-    ];
+		];
 
-    return this.props.displayMode === FormDisplayMode.Display ? cmdEdit : cmdSave;
-  }
-
-  private onClickEditItem(): boolean | void {
-    const searchParams = new URLSearchParams(window.location.search);
-    if (searchParams.has("PageType")) {
-      searchParams.set("PageType", FormDisplayMode.Edit.toString());
-      window.location.href = location.protocol + "//" + location.host + location.pathname + "?" + searchParams;
-    }
-  }
+		return this.props.displayMode === FormDisplayMode.Display ? cmdBarEdit : cmdBarSave;
+	}
 
 	private renderSaveButton = (item: ICommandBarItemProps): React.ReactNode => {
 		return (
@@ -142,19 +97,78 @@ export default class CustomForm extends React.Component<ICustomFormProps, ICusto
 		);
 	}
 
-	private fetchFieldChoices = async (listGuid: string, fieldName: string): Promise<string[]> => {
-		const customFields = await this.getListFields(listGuid);
-		// console.log('customFields:', customFields);
-		// customFields.forEach(field => {
-		// 	console.log(`${field.Title}: ${field.TypeAsString}`);
-		// });
+	private onClickEditItem(): boolean | void {
+		// this.props.onChangeDisplayMode(FormDisplayMode.Edit);
 
-		const fieldChoices = customFields.find(field => field.Title === fieldName)?.Choices;
-		// console.log('clChoiceCheck:', clChoiceCheck);
-		return Promise.resolve(fieldChoices?? []);
-	};
+		const searchParams = new URLSearchParams(window.location.search);
+		if (searchParams.has("PageType")) {
+			searchParams.set("PageType", FormDisplayMode.Edit.toString());
+			window.location.href = location.protocol + "//" + location.host + location.pathname + "?" + searchParams;
+		}
+	}
 
-	private getListFields = async (listGuid: string): Promise<IFieldInfo[]> => {
+	private validateForm = async (ev: React.FormEvent<HTMLFormElement>): Promise<void> => {
+		ev.preventDefault();
+		// console.log('props:', this.props);
+		// console.log('state:', this.state);
+		try {
+			await this.saveItem();
+
+			await this.props.onSave();
+			this.props.onClose();
+		}
+		catch (error) {
+			console.error(error);
+		}
+	}
+
+	private saveItem = async (): Promise<void> => {
+		try {
+			const {
+				Title,
+				clSingleText, clMultiLinesPlain, clMultiLinesEnhance,
+				clChoiceDrop, clChoiceRadio, clChoiceCheck,
+				clNumber, clCurrency, clDate, clDateTime, clYesNo,
+				clPersonId, clPersonGroupId, clPersonMultiId,
+				// clPerson, clPersonGroup, clPersonMulti,
+				// clLink, clPicture, clTaskOutcome
+			} = this.state.childState;
+			console.log('saveItem:', this.state);
+
+			const spList = this.spFI.web.lists.getById(this.props.listGuid.toString());
+			await spList.items.getById(this.props.itemId).update({
+				Title: Title,
+				clSingleText: clSingleText,
+				clMultiLinesEnhance: clMultiLinesEnhance,
+				clMultiLinesPlain: clMultiLinesPlain,
+				clChoiceDrop: clChoiceDrop.key,
+				clChoiceRadio: clChoiceRadio.key,
+				clChoiceCheck: clChoiceCheck.map((item) => item.key),
+				clNumber: clNumber,
+				clCurrency: clCurrency,
+				clDate: clDate,
+				clDateTime: clDateTime,
+				clYesNo: clYesNo,
+
+				clPersonId: clPersonId,
+				clPersonGroupId: clPersonGroupId,
+				clPersonMultiId: clPersonMultiId,
+				// clPerson: clPerson,
+				// clPersonGroup: clPersonGroup,
+				// clPersonMulti: clPersonMulti,
+			});
+			// console.log('item:', item);
+
+			// await this.props.onSave();
+		}
+		catch (error) {
+			console.error(error);
+			return Promise.reject(error);
+		}
+	}
+
+
+	private getListCustomFields = async (listGuid: string): Promise<IFieldInfo[]> => {
 		try {
 			const fields: IFieldInfo[] = await this.spFI.web.lists.getById(listGuid).fields();
 			const customFields = fields.filter(field => !field.FromBaseType && !field.Hidden);
@@ -165,123 +179,42 @@ export default class CustomForm extends React.Component<ICustomFormProps, ICusto
 			console.error('Error getting fields:', error);
 			throw error;
 		}
-	};
-
-	private loadItemById = async (listGuid: string, itemId: number): Promise<CustomListItem> => {
-		// console.log('getItem:', listGuid, '\nitemId:', itemId);
-
-		const item: CustomListItem = await this.spFI.web.lists.getById(listGuid).items.getById(itemId)();
-		return Promise.resolve(item);
 	}
 
-	// private validateForm = async (ev: React.FormEvent<HTMLFormElement>): Promise<void> => {
-	// 	ev.preventDefault();
-	// 	console.log('props:', this.props);
-	// 	try {
-	// 		console.log('ev:', this.state);
-	// 		// const item = await this.spFI.web.lists.getById(this.props.listGuid).items.add(this.state);
-	// 		// console.log('item:', item);
-	// 		// this.props.onClose
-	// 	}
-	// 	catch (error) {
-	// 		console.error(error);
-	// 	}
-	// }
+	private fetchFieldChoices = async (listGuid: string, fieldName: string): Promise<string[]> => {
+		const customFields = await this.getListCustomFields(listGuid);
+		// console.log('customFields:', customFields);
+		const fieldChoices = customFields.find(field => field.Title === fieldName)?.Choices;
+		// console.log('fieldChoices:', fieldChoices);
 
-	// private saveItem = async (): Promise<void> => {
-	// 	console.log('saveItem:', this.props);
-
-	// 	const spList = this.spFI.web.lists.getById(this.props.listGuid.toString());
-	// 	const item = await spList.items.getById(this.props.itemId).update({
-	// 		Title: 'New Title',
-	// 		clSingleText: 'New Single Text',
-	// 		clMultiLinesEnhance: 'New Multi Lines Enhance',
-	// 		clMultiLinesPlain: 'New Multi Lines'
-	// 	});
-
-	// 	console.log('item:', item);
-	// 	this.props.onClose();
-	// }
-
-	private validateForm = async (ev: React.FormEvent<HTMLFormElement>): Promise<void> => {
-		ev.preventDefault();
-		// console.log('props:', this.props);
-		try {
-			// console.log('state:', this.state);
-			// const item = await this.spFI.web.lists.getById(this.props.listGuid).items.add(this.state);
-			// console.log('item:', item);
-			// this.props.onClose
-			await this.saveItem();
-			// await this.props.onSave();
-			this.props.onClose();
-		}
-		catch (error) {
-			console.error(error);
-		}
+		return Promise.resolve(fieldChoices ?? []);
 	}
-
-	private saveItem = async (): Promise<void> => {
-		const {
-			Title,
-			clSingleText, clMultiLinesPlain, clMultiLinesEnhance,
-			clChoiceDrop, clChoiceRadio, clChoiceCheck,
-			clNumber, clCurrency, clDate, clDateTime, clYesNo,
-			clPersonId, clPersonGroupId, clPersonMultiId,
-			// clPerson, clPersonGroup, clPersonMulti,
-			// clLink, clPicture, clTaskOutcome
-		} = this.state.childState;
-		console.log('saveItem:', this.state);
-
-		const spList = this.spFI.web.lists.getById(this.props.listGuid.toString());
-		// const item =
-		await spList.items.getById(this.props.itemId).update({
-			Title: Title,
-			clSingleText: clSingleText,
-			clMultiLinesEnhance: clMultiLinesEnhance,
-			clMultiLinesPlain: clMultiLinesPlain,
-			clChoiceDrop: clChoiceDrop.key,
-			clChoiceRadio: clChoiceRadio.key,
-			clChoiceCheck: clChoiceCheck.map((item) => item.key),
-			clNumber: clNumber,
-			clCurrency: clCurrency,
-			clDate: clDate,
-			clDateTime: clDateTime,
-			clYesNo: clYesNo,
-
-			clPersonId: clPersonId,
-			clPersonGroupId: clPersonGroupId,
-			clPersonMultiId: clPersonMultiId,
-			// clPerson: clPerson,
-			// clPersonGroup: clPersonGroup,
-			// clPersonMulti: clPersonMulti,
-		});
-		// console.log('item:', item);
-			await this.props.onSave();
-	}
-
-	private handleChildState = (newState: IFormState): void => {
-		// console.log('childState:', newState);
-		this.setState({ childState: newState });
-	};
 
 	private getDropdownOptions = async (): Promise<FormDropOptions> => {
-		const [optionsCheck, optionsRadio, optionsDrop] =
-		await Promise.all([
+		const [optionsCheck, optionsRadio, optionsDrop] = await Promise.all([
 			this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceCheck'),
 			this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceRadio'),
 			this.fetchFieldChoices(this.props.listGuid.toString(), 'clChoiceDrop')
 		]);
-		// const tmp: FormDropOptions =
+
 		return ({
 			'clChoiceCheck': optionsCheck.map((item) => ({ key: item, text: item })),
 			'clChoiceRadio': optionsRadio.map((item) => ({ key: item, text: item })),
 			'clChoiceDrop': optionsDrop.map((item) => ({ key: item, text: item }))
 		});
-		// return Promise.resolve(tmp);
-		// return [optionsCheck, optionsRadio, optionsDrop];
-		// this.ddOptions = [optionsCheck, optionsRadio, optionsDrop];
-		// console.log('ddOptions:', this.ddOptions);
-	};
+	}
+
+	private loadItemById = async (listGuid: string, itemId: number): Promise<CustomListItem> => {
+		// console.log('getItem:', listGuid, '\nitemId:', itemId);
+		const item: CustomListItem = await this.spFI.web.lists.getById(listGuid).items.getById(itemId)();
+
+		return Promise.resolve(item);
+	}
+
+	private handleChildState = (newState: IFormState): void => {
+		// console.log('childState:', newState);
+		this.setState({ childState: newState });
+	}
 
 
 	public render(): React.ReactElement<ICustomFormProps> {

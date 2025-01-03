@@ -52,3 +52,7 @@
 	@include ms-fontSize-18;
 	font-weight: 600;
 }
+
+.disabled {
+	background-color: "[theme: disabled, default: rgb(243, 242, 241)]";
+}
